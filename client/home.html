@@ -40,11 +40,11 @@
             <form class="auth-form active" id="loginForm">
                 <div class="form-group">
                     <span class="material-icons">alternate_email</span>
-                    <input type="text" placeholder="Username or Email">
+                    <input type="text" name="email" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <span class="material-icons">lock</span>
-                    <input type="password" placeholder="Password">
+                    <input type="password" name="password" placeholder="Password">
                 </div>
                 <button type="submit" class="btn" style="width: 100%;">Login</button>
             </form>
@@ -52,23 +52,23 @@
             <form class="auth-form" id="registerForm">
                 <div class="form-group">
                     <span class="material-icons">person</span>
-                    <input type="text" placeholder="Name">
+                    <input type="text" name="fullName" placeholder="Full Name">
                 </div>
                 <div class="form-group">
                     <span class="material-icons">alternate_email</span>
-                    <input type="text" placeholder="Username">
+                    <input type="text" name="userName" placeholder="Username">
                 </div>
                 <div class="form-group">
                     <span class="material-icons">email</span>
-                    <input type="email" placeholder="Email">
+                    <input type="email" name="email" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <span class="material-icons">lock</span>
-                    <input type="password" placeholder="Password">
+                    <input type="password" name="password" placeholder="Password">
                 </div>
                 <div class="form-group">
                     <span class="material-icons">lock_clock</span>
-                    <input type="password" placeholder="Confirm Password">
+                    <input type="password" name="confirmPassword" placeholder="Confirm Password">
                 </div>
                 <button type="submit" class="btn" style="width: 100%;">Register</button>
             </form>
@@ -116,24 +116,7 @@
                 </div>
             </div>
             <div class="chat-container">
-                <div class="chat-messages">
-                    <div class="message">
-                        <div class="avatar">J</div>
-                        <div class="message-content">
-                            <div class="user">John</div>
-                            <p>Hey, ready to watch?</p>
-                            <div class="time">2:39 PM</div>
-                        </div>
-                    </div>
-                    <div class="message">
-                        <div class="avatar">Y</div>
-                        <div class="message-content">
-                            <div class="user">You</div>
-                            <p>Yes, let's start!</p>
-                            <div class="time">2:40 PM</div>
-                        </div>
-                    </div>
-                </div>
+                <div class="chat-messages"></div>
                 <div class="chat-input">
                     <input type="text" placeholder="Type your message...">
                     <button class="control-btn">
