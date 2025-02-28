@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     myPeerId = null;
                     connectWebSocket();
-                }, 3000);
+                }, 15000);
             }
         };
 
