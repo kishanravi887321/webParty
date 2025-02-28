@@ -20,7 +20,13 @@ app.use(express.json());
 // }));
 // app.use(cors({ origin: 'http://127.0.0.1:5000', credentials: true }))
 
-app.use(cors())
+app.use(cors({
+    origin: '*', // Allow access from anywhere
+    credentials: true,               
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use("/api/users",userRouter)
 
 
