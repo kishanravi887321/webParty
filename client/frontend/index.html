@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebParty - Watch Together</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Inject WebSocket URL dynamically for local dev or Render production -->
+    <script>
+        // Detect if running locally or on a server (e.g., Render)
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
+        window.WEBSOCKET_URL = isLocal ? "ws://127.0.0.1:5000" : "wss://webparty-1.onrender.com";
+        console.log("WebSocket URL set to:", window.WEBSOCKET_URL);
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="logo">
+            <span>Web</span><span>Party</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn" id="selectRoomBtn">
+                <span class="material-icons">meeting_room</span>
+                Select Room
+            </button>
+            <button class="btn" id="loginBtn">
+                <span class="material-icons">login</span>
+                Login
+            </button>
+        </div>
+    </nav>
+
+    <!-- Login/Register Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Welcome to WebParty</h2>
+                <button class="close-btn">×</button>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm">
+                <div class="form-group">
+                    <span class="material-icons">alternate_email</span>
+                    <input type="text" name="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">lock</span>
+                    <input type="password" name="password" placeholder="Password">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Login</button>
+            </form>
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <span class="material-icons">person</span>
+                    <input type="text" name="fullName" placeholder="Full Name">
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">alternate_email</span>
+                    <input type="text" name="userName" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">email</span>
+                    <input type="email" name="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">lock</span>
+                    <input type="password" name="password" placeholder="Password">
+                </div>
+                <div class="form-group">
+                    <span class="material-icons">lock_clock</span>
+                    <input type="password" name="confirmPassword" placeholder="Confirm Password">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Room Selection Modal -->
+    <div class="modal" id="roomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select Room Type</h2>
+                <button class="close-btn">×</button>
+            </div>
+            <div class="room-options">
+                <div class="room-option" data-type="private">
+                    <div class="room-icon">
+                        <span class="material-icons">lock</span>
+                    </div>
+                    <h3>Private Room</h3>
+                    <p>Watch with invited friends only</p>
+                </div>
+                <div class="room-option" data-type="normal">
+                    <div class="room-icon">
+                        <span class="material-icons">groups</span>
+                    </div>
+                    <h3>Normal Room</h3>
+                    <p>Open for everyone to join</p>
+                </div>
+            </div>
+            <div class="room-actions">
+                <button class="btn" id="createRoomBtn">Create Room</button>
+                <button class="btn" id="joinRoomBtn">Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="room-info">
+                <h2 id="roomTitle">Private Room</h2>
+                <div id="roomIdDisplay" style="margin-top: 1rem; text-align: center; font-size: 1.2rem; color: var(--neon-primary);">
+                    Room ID: <span id="generatedRoomId">Not Generated</span>
+                </div>
+                <!-- Color Picker Button -->
+                <button class="color-picker-btn" id="colorPickerBtn" title="Change Room Colors">
+                    <span class="material-icons">palette</span>
+                </button>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Type your message...">
+                    <button class="control-btn">
+                        <span class="material-icons">send</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="video-container">
+                <video id="mainVideo" poster="/placeholder.svg?height=400&width=700"></video>
+                <div class="participants">
+                    <div class="participant" draggable="true">
+                        <video id="localVideo" autoplay muted></video>
+                        <div class="controls">
+                            <button class="control-btn">
+                                <span class="material-icons">mic</span>
+                            </button>
+                            <button class="control-btn">
+                                <span class="material-icons">videocam</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="participant" draggable="true">
+                        <video id="remoteVideo" autoplay></video>
+                        <div class="controls">
+                            <button class="control-btn">
+                                <span class="material-icons">mic</span>
+                            </button>
+                            <button class="control-btn">
+                                <span class="material-icons">videocam</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load script.js as a module -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
