@@ -12,11 +12,19 @@ setupWebSocket(server);
 // Start the server
 const PORT = process.env.PORT || 8900;
 
-connectDB().then(()=>{
-    server.listen(PORT, () => {
-        console.log(`⚙️ Server is running on port: ${PORT}`);
-    });
-}).catch((err) => {
-    console.log("MONGO db connection failed !!! ", err);
-})
+const startServer = async () => {
+    try {
+        await connectDB();
+        console.log("✅ Connected to MongoDB successfully");
+    } catch (err) {
+        console.error("⚠️ MongoDB connection failed:", err);
+        console.warn("⚠️ Server will still run, but database features may not work.");
+    }
 
+    // Start the WebRTC & WebSocket Server even if DB fails
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on port: ${PORT}`);
+    });
+};
+
+startServer();

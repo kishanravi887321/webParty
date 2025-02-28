@@ -1,4 +1,3 @@
-// src/setupWebSocket.js (Updated for P2P and SFU)
 import { WebSocketServer } from "ws";
 
 export const setupWebSocket = (server) => {
@@ -33,7 +32,7 @@ export const setupWebSocket = (server) => {
                     return;
                 }
 
-                // Limit private rooms to 2 users
+                // Limit private rooms to 2 users (P2P)
                 if (roomType === 'private' && room.peers.size >= 2) {
                     console.warn(`Room ${roomId} (private) is full (max 2 users). Rejecting peer ${peerId}.`);
                     ws.send(JSON.stringify({ type: "error", message: "Private room is full (max 2 users)." }));
@@ -52,29 +51,25 @@ export const setupWebSocket = (server) => {
                     ws.send(JSON.stringify({ type: "peerList", peers: peerList }));
                 }
 
+                // Notify existing peers based on room type
                 room.peers.forEach((existingPeerId) => {
                     if (existingPeerId !== peerId) {
-                        if (roomType === 'private') {
-                            // P2P: Send newPeer to specific peer
-                            wss.clients.forEach((client) => {
-                                if (client.roomId === roomId && client.peerId === existingPeerId && client.readyState === client.OPEN) {
+                        wss.clients.forEach((client) => {
+                            if (client.roomId === roomId && client.peerId === existingPeerId && client.readyState === client.OPEN) {
+                                if (roomType === 'private') {
+                                    // P2P: Send newPeer directly to the specific peer
+                                    client.send(JSON.stringify({ type: "newPeer", peerId }));
+                                } else if (roomType === 'normal') {
+                                    // SFU: Broadcast to all peers in the room (simulating SFU behavior)
                                     client.send(JSON.stringify({ type: "newPeer", peerId }));
                                 }
-                            });
-                        } else {
-                            // SFU: Broadcast to all peers or send to SFU
-                            wss.clients.forEach((client) => {
-                                if (client.roomId === roomId && client.readyState === client.OPEN) {
-                                    client.send(JSON.stringify({ type: "newPeer", peerId }));
-                                }
-                            });
-                        }
+                            }
+                        });
                     }
                 });
 
-                // Placeholder for SFU: In a real SFU, you'd connect this peer to the SFU server
+                // Placeholder for SFU in normal rooms: Simulate SFU by broadcasting peer info
                 if (roomType === 'normal') {
-                    // Simulate SFU by broadcasting peer info (replace with actual SFU logic)
                     wss.clients.forEach((client) => {
                         if (client.roomId === roomId && client.readyState === client.OPEN) {
                             client.send(JSON.stringify({
@@ -98,15 +93,26 @@ export const setupWebSocket = (server) => {
             const userCount = room.peers.size;
             console.log(`Broadcasting ${data.type} from ${ws.peerId} in room ${roomId} to other peers, Total users: ${userCount}, Room type: ${room.type}`);
 
+            // Handle broadcasting based on room type
             if (room.type === 'private' && data.targetPeerId) {
-                // P2P: Send to specific peer
+                // P2P: Send to the specific target peer (e.g., for offers, answers, candidates)
                 wss.clients.forEach((client) => {
                     if (client.roomId === roomId && client.peerId === data.targetPeerId && client.readyState === client.OPEN) {
                         client.send(JSON.stringify(data));
                     }
                 });
             } else {
-                // SFU or normal broadcast: Send to all peers (or SFU)
+                // Normal room (SFU) or broadcast for other messages: Send to all peers except sender
+                wss.clients.forEach((client) => {
+                    if (client.roomId === roomId && client.peerId !== ws.peerId && client.readyState === client.OPEN) {
+                        client.send(JSON.stringify(data));
+                    }
+                });
+            }
+
+            // Handle specific message types for SFU in normal rooms (optional enhancement)
+            if (room.type === 'normal' && ['offer', 'answer', 'candidate'].includes(data.type)) {
+                // Simulate SFU by broadcasting to all peers (in a real SFU, this would go to an SFU server)
                 wss.clients.forEach((client) => {
                     if (client.roomId === roomId && client.peerId !== ws.peerId && client.readyState === client.OPEN) {
                         client.send(JSON.stringify(data));
@@ -124,6 +130,7 @@ export const setupWebSocket = (server) => {
                 const userCount = room.peers.size || 0;
                 console.log(`❌ Client disconnected from room: ${roomId} with peerId: ${peerId}, Remaining users: ${userCount}, Room type: ${room.type}`);
 
+                // Notify all remaining peers in the room
                 wss.clients.forEach((client) => {
                     if (client.roomId === roomId && client.readyState === client.OPEN) {
                         client.send(JSON.stringify({ type: "peerLeft", peerId }));
