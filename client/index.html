@@ -6,6 +6,12 @@
     <title>WebParty - Watch Together</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Inject WebSocket URL from Render environment variable for production, defaults to local for development -->
+    <script>
+        // Detect if running locally or on Render
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        window.WEBSOCKET_URL = isLocal ? "ws://127.0.0.1:5000" : "{{WEBSOCKET_URL}}" || "wss://webparty-1.onrender.com";
+    </script>
 </head>
 <body>
     <!-- Navigation -->
@@ -130,39 +136,38 @@
             </div>
         </div>
 
-            <!-- Main Content -->
-            <div class="main-content">
-                <div class="video-container">
-                    <video id="mainVideo" poster="/placeholder.svg?height=400&width=700"></video>
-                    <div class="participants">
-                        <div class="participant" draggable="true">
-                            <video id="localVideo" autoplay muted></video>
-                            <div class="controls">
-                                <button class="control-btn">
-                                    <span class="material-icons">mic</span>
-                                </button>
-                                <button class="control-btn">
-                                    <span class="material-icons">videocam</span>
-                                </button>
-                            </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="video-container">
+                <video id="mainVideo" poster="/placeholder.svg?height=400&width=700"></video>
+                <div class="participants">
+                    <div class="participant" draggable="true">
+                        <video id="localVideo" autoplay muted></video>
+                        <div class="controls">
+                            <button class="control-btn">
+                                <span class="material-icons">mic</span>
+                            </button>
+                            <button class="control-btn">
+                                <span class="material-icons">videocam</span>
+                            </button>
                         </div>
-                        <div class="participant" draggable="true">
-                            <video id="remoteVideo" autoplay></video>
-                            <div class="controls">
-                                <button class="control-btn">
-                                    <span class="material-icons">mic</span>
-                                </button>
-                                <button class="control-btn">
-                                    <span class="material-icons">videocam</span>
-                                </button>
-                            </div>
+                    </div>
+                    <div class="participant" draggable="true">
+                        <video id="remoteVideo" autoplay></video>
+                        <div class="controls">
+                            <button class="control-btn">
+                                <span class="material-icons">mic</span>
+                            </button>
+                            <button class="control-btn">
+                                <span class="material-icons">videocam</span>
+                            </button>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-  
+    <script src="script.js"></script>
 </body>
-<script src="script.js"></script>
 </html>
