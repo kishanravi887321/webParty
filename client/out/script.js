@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Use a server-hosted WebSocket URL (replace with your actual server URL)
-        const WEBSOCKET_URL = window.WEBSOCKET_URL || "wss://webparty-1.onrender.com"; // Default to production URL
+        const WEBSOCKET_URL ="wss://webparty-1.onrender.com"; // Default to production URL
         socket = new WebSocket(WEBSOCKET_URL);
 
         let connectTimeout;
