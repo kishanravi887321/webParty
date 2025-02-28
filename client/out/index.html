@@ -6,11 +6,12 @@
     <title>WebParty - Watch Together</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- Inject WebSocket URL from Render environment variable for production, defaults to local for development -->
+    <!-- Inject WebSocket URL dynamically for local dev or Render production -->
     <script>
-        // Detect if running locally or on Render
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        window.WEBSOCKET_URL = isLocal ? "ws://127.0.0.1:5000" : "{{WEBSOCKET_URL}}" || "wss://webparty-1.onrender.com";
+        // Detect if running locally or on a server (e.g., Render)
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
+        window.WEBSOCKET_URL = isLocal ? "ws://127.0.0.1:5000" : "wss://webparty-1.onrender.com";
+        console.log("WebSocket URL set to:", window.WEBSOCKET_URL);
     </script>
 </head>
 <body>

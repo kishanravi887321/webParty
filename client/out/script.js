@@ -80,16 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // WebSocket Connection (Only on room creation/join)
+    // WebSocket Connection (Updated for server hosting)
     function connectWebSocket() {
         if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
             console.warn("WebSocket already connected or connecting, skipping...");
             return;
         }
 
-        // Dynamically determine WebSocket URL based on environment
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const WEBSOCKET_URL = isLocal ? "ws://127.0.0.1:5000" : (window.WEBSOCKET_URL || "wss://webparty-1.onrender.com");
+        // Use a server-hosted WebSocket URL (replace with your actual server URL)
+        const WEBSOCKET_URL = window.WEBSOCKET_URL || "wss://webparty-1.onrender.com"; // Default to production URL
         socket = new WebSocket(WEBSOCKET_URL);
 
         let connectTimeout;
@@ -150,13 +149,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert("This private room is full (max 2 users). Please try another room or create a new one.");
                     roomModal.classList.add('active');
                 }
-                alert(`Server error: ${data.message}. Please refresh and try again.`);
+                alert(`Server error: ${data.message}. Please try again or contact support.`);
             }
         };
 
         socket.onerror = (error) => {
             console.error("WebSocket Error:", error);
-            alert(`WebSocket connection failed to ${WEBSOCKET_URL}. Please check your network, ensure the backend is running locally (for localhost) or on Render (for production), and try again.`);
+            alert(`WebSocket connection failed to ${WEBSOCKET_URL}. Please check your network or contact support if the issue persists.`);
             if (socket) {
                 socket.close();
                 socket = null;
@@ -172,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Add timeout for connection attempt
         connectTimeout = setTimeout(() => {
             if (socket.readyState === WebSocket.CONNECTING) {
                 console.warn("WebSocket connection timed out, retrying...");
@@ -183,26 +181,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000); // 5-second timeout
     }
 
-    // Get a unique, persistent peer ID for the current user (using sessionStorage with fallback, regenerate on duplicate)
+    // Get a unique, persistent peer ID for the current user
     function getMyPeerId() {
         if (!myPeerId) {
             try {
-                // Try sessionStorage first
                 myPeerId = sessionStorage.getItem('peerId');
                 if (!myPeerId) {
-                    // Fallback to localStorage if sessionStorage is blocked
                     myPeerId = localStorage.getItem('peerId');
                     if (!myPeerId) {
                         myPeerId = `peer-${Date.now()}-${crypto.randomUUID().split('-')[0] || Math.random().toString(36).substr(2, 9)}`;
-                        sessionStorage.setItem('peerId', myPeerId); // Prefer sessionStorage
-                        localStorage.setItem('peerId', myPeerId); // Fallback to localStorage
+                        sessionStorage.setItem('peerId', myPeerId);
+                        localStorage.setItem('peerId', myPeerId);
                     } else {
-                        sessionStorage.setItem('peerId', myPeerId); // Sync to sessionStorage if possible
+                        sessionStorage.setItem('peerId', myPeerId);
                     }
                 }
             } catch (e) {
-                console.warn("Storage access blocked by tracking prevention, using fallback peerId");
-                // Fallback if storage is blocked (e.g., tracking prevention)
+                console.warn("Storage access blocked, using fallback peerId");
                 myPeerId = `peer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             }
             console.log(`Generated/Retrieved persistent peerId: ${myPeerId}`);
@@ -210,13 +205,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return myPeerId;
     }
 
-    // Get User Media with Fallback for Camera Conflicts
+    // Get User Media with Fallback
     async function initializeMedia() {
         try {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 console.log("✅ Camera and microphone access granted");
-                // Set local video stream to local circle
                 const localVideoElement = document.getElementById('localVideo');
                 if (localVideoElement) localVideoElement.srcObject = localStream;
             }
@@ -224,26 +218,25 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("❌ Error Getting Media:", error);
             if (error.name === "NotAllowedError" || error.name === "NotFoundError") {
                 alert("Camera or microphone access denied or already in use. Please close other applications or grant permissions.");
-                return null; // Return null to indicate failure
+                return null;
             } else {
                 alert("Failed to access camera/microphone. Please grant permissions or check your setup.");
-                return null; // Return null to indicate failure
+                return null;
             }
-            // Optionally, try a fallback (e.g., retry or use a mock video)
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true }); // Audio-only fallback
-                localVideo.srcObject = null; // No video if camera is blocked
+                localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                localVideo.srcObject = null;
                 console.warn("Falling back to audio-only due to camera access issues");
-                return localStream; // Return the fallback stream
+                return localStream;
             } catch (fallbackError) {
                 console.error("❌ Fallback failed:", fallbackError);
-                return null; // Return null if fallback fails
+                return null;
             }
         }
-        return localStream; // Return the successful stream
+        return localStream;
     }
 
-    // Create Peer Connection for Simple Broadcasting
+    // Create Peer Connection
     function createPeerConnection(peerId) {
         if (peerConnections.has(peerId)) {
             console.log(`Peer connection for ${peerId} already exists, reusing it.`);
@@ -270,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Add ontrack to capture the remote stream correctly
         pc.ontrack = (event) => {
             console.log(`ontrack event for peer ${peerId} with stream:`, event.streams[0]);
             const remoteVideo = document.getElementById('remoteVideo');
@@ -285,13 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 removeParticipant(peerId);
                 peerConnections.delete(peerId);
                 peerList.delete(peerId);
-                // Reset remote video if disconnected
                 const remoteVideo = document.getElementById('remoteVideo');
                 if (remoteVideo) remoteVideo.srcObject = null;
             }
         };
 
-        // Add tracks only if not already added and localStream exists
         if (localStream) {
             localStream.getTracks().forEach(track => {
                 if (!pc.getSenders().some(sender => sender.track === track)) {
@@ -306,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return pc;
     }
 
-    // Handle WebRTC Signaling for Simple Broadcasting
+    // Handle WebRTC Signaling
     async function handleOffer(data) {
         const peerId = data.peerId;
         const pc = peerConnections.get(peerId) || createPeerConnection(peerId);
@@ -354,15 +344,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Start Call for Room (Simple broadcast to remote circle)
+    // Start Call for Room
     async function startCallForRoom() {
         if (!myPeerId) myPeerId = getMyPeerId();
         if (!peerList.has(myPeerId)) {
-            peerList.add(myPeerId); // Add self to peer list only if not already present
+            peerList.add(myPeerId);
         }
 
         console.log(`Starting call for room ${currentRoomId}, my peerId: ${myPeerId}, peerList:`, Array.from(peerList));
-        if (peerList.size === 1) return; // No remote peer to connect to yet
+        if (peerList.size === 1) return;
 
         const remotePeerId = Array.from(peerList).find(peerId => peerId !== myPeerId);
         if (remotePeerId && !peerConnections.has(remotePeerId)) {
@@ -381,27 +371,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     console.warn("WebSocket not open, cannot send offer");
                 }
-            }, 2000); // Delay of 2000ms to avoid race conditions
+            }, 2000);
         } else {
             console.log(`Skipping connection - no remote peer or already connected`);
         }
     }
 
-    // Handle Peer List from Server (Update remote circle)
+    // Handle Peer List from Server
     function handlePeerList(peers) {
         console.log(`Received peerList for room ${currentRoomId}:`, peers);
         if (!myPeerId) myPeerId = getMyPeerId();
-        peerList.clear(); // Clear existing peer list to ensure no duplicates
-        peerList.add(myPeerId); // Re-add self
+        peerList.clear();
+        peerList.add(myPeerId);
         peers.forEach(peerId => {
             if (peerId !== myPeerId && !peerList.has(peerId)) {
                 peerList.add(peerId);
             }
         });
         console.log(`Updated peerList:`, Array.from(peerList));
-        
-        // Update UI for remote peer
-        if (peerList.size === 2) { // Only one remote peer for simplicity
+
+        if (peerList.size === 2) {
             const remotePeerId = Array.from(peerList).find(peerId => peerId !== myPeerId);
             if (remotePeerId) {
                 const localParticipant = document.querySelector('.participant:nth-child(1)');
@@ -416,20 +405,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     const remoteControls = remoteParticipant.querySelectorAll('.control-btn');
                     remoteControls.forEach(btn => btn.dataset.peerId = remotePeerId);
                 }
-                startCallForRoom(); // Initiate connection with the remote peer
+                startCallForRoom();
             }
         } else {
             console.warn("Unexpected number of peers, expected 2 for simple broadcast");
         }
     }
 
-    // Handle New Peer Joining (Update remote circle)
+    // Handle New Peer Joining
     async function handleNewPeer(newPeerId) {
         console.log(`New peer joined: ${newPeerId} in room ${currentRoomId}`);
         if (!myPeerId) myPeerId = getMyPeerId();
         if (!peerList.has(newPeerId)) {
             peerList.add(newPeerId);
-            if (peerList.size === 2) { // Only handle one remote peer for simplicity
+            if (peerList.size === 2) {
                 const localParticipant = document.querySelector('.participant:nth-child(1)');
                 const remoteParticipant = document.querySelector('.participant:nth-child(2)');
                 if (localParticipant) {
@@ -457,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         console.warn("WebSocket not open, cannot send offer");
                     }
-                }, 2000); // Delay of 2000ms to avoid race conditions
+                }, 2000);
             } else {
                 console.warn(`Duplicate or unexpected newPeer ${newPeerId} detected, ignoring`);
             }
@@ -471,22 +460,18 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', () => {
                 const type = button.dataset.type;
                 if (peerId === myPeerId || peerId === '') {
-                    // Handle local user (real user) media
                     if (type === 'mic') {
                         const isMicMuted = !localStream.getAudioTracks()[0].enabled;
-                        localStream.getAudioTracks()[0].enabled = !isMicMuted; // Toggle mute
+                        localStream.getAudioTracks()[0].enabled = !isMicMuted;
                         button.style.opacity = isMicMuted ? '1' : '0.5';
-                        // Notify other peers about the mute state
                         broadcastMuteState('audio', isMicMuted);
                     } else if (type === 'videocam') {
                         const isCameraOff = !localStream.getVideoTracks()[0].enabled;
-                        localStream.getVideoTracks()[0].enabled = !isCameraOff; // Toggle video
+                        localStream.getVideoTracks()[0].enabled = !isCameraOff;
                         button.style.opacity = isCameraOff ? '1' : '0.5';
-                        // Notify other peers about the mute state
                         broadcastMuteState('video', isCameraOff);
                     }
                 } else {
-                    // Handle remote user (connected peer) - notify them to mute/unmute
                     const isMuted = button.style.opacity === '0.5';
                     if (type === 'mic') {
                         broadcastMuteState('audio', !isMuted, peerId);
@@ -508,36 +493,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 muted: muted
             };
             if (targetPeerId) {
-                // Send to a specific peer (P2P for private rooms)
                 message.targetPeerId = targetPeerId;
                 socket.send(JSON.stringify(message));
             } else {
-                // Broadcast to all peers (SFU for normal rooms or P2P broadcast)
                 socket.send(JSON.stringify(message));
             }
         }
     }
 
-    // Handle Remote Mute Requests (for connected peers)
-    function handleRemoteMute(peerId, type, muted) {
-        const participant = participantsContainer.querySelector(`[data-peer-id="${peerId}"]`);
-        if (participant) {
-            const video = participant.querySelector('video');
-            const controlBtn = participant.querySelector(`.control-btn[data-type="${type}"]`);
-            if (video && controlBtn) {
-                if (type === 'video') {
-                    const videoTracks = video.srcObject?.getVideoTracks() || [];
-                    videoTracks.forEach(track => track.enabled = !muted);
-                } else if (type === 'audio') {
-                    const audioTracks = video.srcObject?.getAudioTracks() || [];
-                    audioTracks.forEach(track => track.enabled = !muted);
-                }
-                controlBtn.style.opacity = muted ? '0.5' : '1';
-            }
-        }
-    }
-
-    // Remove Participant (Updated to clean up peer connections properly and log)
+    // Remove Participant
     function removeParticipant(peerId) {
         console.log(`Removing participant with peerId: ${peerId}`);
         const participant = participantsContainer.querySelector(`[data-peer-id="${peerId}"]`);
@@ -547,27 +511,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (peerConnections.has(peerId)) {
             const pc = peerConnections.get(peerId);
             if (pc) {
-                pc.close(); // Close the peer connection
+                pc.close();
             }
             peerConnections.delete(peerId);
         }
         peerList.delete(peerId);
-        // Reset remote video if this was the remote peer
         if (peerId !== myPeerId) {
             const remoteVideo = document.getElementById('remoteVideo');
             if (remoteVideo) remoteVideo.srcObject = null;
         }
     }
 
-    // Remove All Participants (for cleanup on disconnect)
+    // Remove All Participants
     function removeAllParticipants() {
-        participantsContainer.innerHTML = ''; // Clear all participant elements
-        peerConnections.clear(); // Clear all peer connections
-        peerList.clear(); // Clear peer list
-        initializeVideoCircles(); // Reinitialize static circles
+        participantsContainer.innerHTML = '';
+        peerConnections.clear();
+        peerList.clear();
+        initializeVideoCircles();
     }
 
-    // Chat Functionality (Enabled only after joining/creating a room)
+    // Chat Functionality
     function sendMessage() {
         if (!currentRoomId || !socket || socket.readyState !== WebSocket.OPEN) {
             alert("Please join or create a room and ensure WebSocket is connected before sending messages.");
@@ -613,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sendButton.addEventListener('click', sendMessage);
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === "Enter") {
-                e.preventDefault(); // Prevent default behavior (e.g., new line in input)
+                e.preventDefault();
                 sendMessage();
             }
         });
@@ -625,25 +588,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === "Enter") sendMessage();
         });
     }
-
-    // Auth API Calls (unchanged for brevity)
-    async function registerUser(event) { /* ... */ }
-    async function loginUser(event) { /* ... */ }
-    async function updatePassword(event) { /* ... */ }
-    async function forgotPassword() { /* ... */ }
-
-    // Auth tabs
-    authTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetForm = tab.dataset.tab;
-            authTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            authForms.forEach(form => {
-                form.classList.remove('active');
-                if (form.id === `${targetForm}Form`) form.classList.add('active');
-            });
-        });
-    });
 
     // Modal controls
     loginBtn.addEventListener('click', () => {
@@ -725,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return roomId;
     }
 
-    // Create/Join Room (Enable chat and handle peer connections, connect socket only here)
+    // Create/Join Room (Updated for server context)
     createRoomBtn.addEventListener('click', async () => {
         console.log("Create Room button clicked");
         if (!createRoomBtn) {
@@ -770,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Room created successfully: ${currentRoomId}, Type: ${roomType}`);
         } catch (error) {
             console.error("Error creating room:", error);
-            alert(`Failed to create room. Please check your network, ensure the backend is running locally (ws://127.0.0.1:5000) or on Render (wss://webparty-1.onrender.com), and try again.`);
+            alert(`Failed to create room. Please check your network or contact support if the issue persists.`);
             roomModal.classList.add('active');
         }
     });
@@ -823,32 +767,29 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Joined room successfully: ${currentRoomId}, Type: ${roomType}`);
         } catch (error) {
             console.error("Error joining room:", error);
-            alert(`Failed to join room. Please check your network, ensure the backend is running locally (ws://127.0.0.1:5000) or on Render (wss://webparty-1.onrender.com), and try again.`);
+            alert(`Failed to join room. Please check your network or contact support if the issue persists.`);
             roomModal.classList.add('active');
         }
     });
 
     // Initialize
-    myPeerId = getMyPeerId(); // Initialize myPeerId on page load (but don’t connect socket yet)
-    disableChat(); // Disable chat initially until a room is joined/created
-    initializeVideoCircles(); // Initialize static video circles on page load
+    myPeerId = getMyPeerId();
+    disableChat();
+    initializeVideoCircles();
+
+    // Color Picker Functionality
     const colorPickerBtn = document.getElementById('colorPickerBtn');
-    
-    // Create a hidden color input dynamically
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
     colorInput.style.display = 'none';
     document.body.appendChild(colorInput);
 
-    // Show color picker when button is clicked
     colorPickerBtn.addEventListener('click', () => {
         colorInput.click();
     });
 
-    // Update room background color and related elements when a new color is selected
     colorInput.addEventListener('change', (e) => {
         const newColor = e.target.value;
-        // Update the background colors for the entire screen
         document.body.style.backgroundColor = newColor;
         document.querySelector('.nav').style.backgroundColor = `rgba(${hexToRgb(newColor).r}, ${hexToRgb(newColor).g}, ${hexToRgb(newColor).b}, 0.8)`;
         document.querySelector('.sidebar').style.backgroundColor = newColor;
@@ -856,11 +797,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.video-container').style.backgroundColor = newColor;
         document.querySelector('.chat-input').style.backgroundColor = `rgba(255, 255, 255, 0.05)`;
         document.querySelector('.modal-content').style.backgroundColor = newColor;
-        
-        // Keep icons and neon elements unaffected (you can adjust this as needed)
     });
 
-    // Helper function to convert hex to RGB
     function hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
