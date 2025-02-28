@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebParty - Watch Together</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -114,6 +115,10 @@
                 <div id="roomIdDisplay" style="margin-top: 1rem; text-align: center; font-size: 1.2rem; color: var(--neon-primary);">
                     Room ID: <span id="generatedRoomId">Not Generated</span>
                 </div>
+                <!-- Color Picker Button -->
+                <button class="color-picker-btn" id="colorPickerBtn" title="Change Room Colors">
+                    <span class="material-icons">palette</span>
+                </button>
             </div>
             <div class="chat-container">
                 <div class="chat-messages"></div>
@@ -129,35 +134,15 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="video-container">
-                <video id="mainVideo" poster="/placeholder.svg?height=400&width=700"></video>
+                <video id="mainVideo"></video> <!-- Removed placeholder.svg to avoid 404 -->
                 <div class="participants">
-                    <div class="participant" draggable="true">
-                        <video id="localVideo" autoplay muted></video>
-                        <div class="controls">
-                            <button class="control-btn">
-                                <span class="material-icons">mic</span>
-                            </button>
-                            <button class="control-btn">
-                                <span class="material-icons">videocam</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="participant" draggable="true">
-                        <video id="remoteVideo" autoplay></video>
-                        <div class="controls">
-                            <button class="control-btn">
-                                <span class="material-icons">mic</span>
-                            </button>
-                            <button class="control-btn">
-                                <span class="material-icons">videocam</span>
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Participants will be added dynamically via JavaScript -->
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>

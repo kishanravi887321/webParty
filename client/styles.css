@@ -16,7 +16,7 @@
 }
 
 body {
-    background-color: var(--dark-bg);
+    background-color: var(--dark-bg); /* Default, will be overridden by JS */
     color: #ffffff;
     min-height: 100vh;
     overflow: hidden;
@@ -32,7 +32,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(10, 10, 10, 0.8);
+    background: rgba(10, 10, 10, 0.8); /* Default, will be overridden by JS */
     backdrop-filter: blur(10px);
     z-index: 100;
 }
@@ -100,7 +100,7 @@ body {
 }
 
 .modal-content {
-    background: var(--darker-bg);
+    background: var(--darker-bg); /* Default, will be overridden by JS */
     padding: 2rem;
     border-radius: 16px;
     width: 90%;
@@ -262,15 +262,17 @@ body {
 /* Sidebar */
 .sidebar {
     width: 300px;
-    background: var(--darker-bg);
+    background: var(--darker-bg); /* Default, will be overridden by JS */
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
+    position: relative; /* Added for positioning the color picker */
 }
 
 .room-info {
     padding: 1rem;
     border-bottom: 1px solid var(--glass-border);
+    position: relative; /* For absolute positioning of the button */
 }
 
 .chat-container {
@@ -337,13 +339,14 @@ body {
 .main-content {
     flex: 1;
     padding: 1rem;
+    background: var(--dark-bg); /* Default, will be overridden by JS */
     position: relative;
 }
 
 .video-container {
     width: 100%;
     height: 100%;
-    background: #000;
+    background: #000; /* Default, will be overridden by JS */
     border-radius: 12px;
     overflow: hidden;
     position: relative;
@@ -408,4 +411,31 @@ body {
 
 .control-btn .material-icons {
     font-size: 18px;
+}
+
+/* Color Picker Button */
+.color-picker-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--neon-primary), var(--neon-purple));
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.color-picker-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 255, 242, 0.5);
+}
+
+.color-picker-btn .material-icons {
+    font-size: 20px;
+    color: white;
 }
