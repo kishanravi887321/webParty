@@ -10,7 +10,9 @@ export async function connectWebSocket({
         return socket;
     }
 
-    const WEBSOCKET_URL = "ws://127.0.0.1:5000";
+    // const WEBSOCKET_URL = "ws://127.0.0.1:5000";
+
+    const WEBSOCKET_URL="wss://webparty-1.onrender.com";  /// for production 
 
     return new Promise((resolve, reject) => {
         socket = new WebSocket(WEBSOCKET_URL);
