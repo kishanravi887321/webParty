@@ -86,7 +86,6 @@ export function setupUI(domElements, {
     // Helper function to check if a room exists
     async function checkRoomExists(roomId) {
         return new Promise((resolve, reject) => {
-            // Use existing socket or create a temporary one
             const ws = socket && socket.readyState === WebSocket.OPEN ? socket : new WebSocket(window.WEBSOCKET_URL);
             let timeoutId;
 
@@ -96,7 +95,7 @@ export function setupUI(domElements, {
                 timeoutId = setTimeout(() => {
                     reject(new Error("Room check timeout"));
                     ws.close();
-                }, 5000); // 5-second timeout
+                }, 5000);
             };
 
             ws.onmessage = (event) => {
@@ -104,7 +103,7 @@ export function setupUI(domElements, {
                 if (data.type === "roomStatus" && data.roomId === roomId) {
                     clearTimeout(timeoutId);
                     resolve(data.exists);
-                    if (!socket) ws.close(); // Close temporary connection if not reusing
+                    if (!socket) ws.close();
                 }
             };
 
@@ -114,7 +113,6 @@ export function setupUI(domElements, {
                 if (!socket) ws.close();
             };
 
-            // If using existing socket, ensure it's ready
             if (socket && socket.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: "checkRoom", roomId }));
             }
@@ -154,10 +152,11 @@ export function setupUI(domElements, {
         }
 
         try {
+            // Pass action: "create" to distinguish from join
             socket = await connectWebSocket({
                 currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
                 displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
-                handlePeerList, handleNewPeer, removeParticipant, localStream
+                handlePeerList, handleNewPeer, removeParticipant, localStream, action: "create"
             });
             await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay for stability
             console.log("WebSocket connection delay completed, proceeding with room setup");
@@ -315,12 +314,11 @@ export function setupUI(domElements, {
         }
 
         try {
-            // Check if the room exists before proceeding
             const roomExists = await checkRoomExists(roomId);
             if (!roomExists) {
                 console.log(`Room ${roomId} does not exist`);
                 alert("Room ID is incorrect or does not exist");
-                return; // Keep roomModal active
+                return;
             }
 
             currentRoomId = roomId;
@@ -348,9 +346,9 @@ export function setupUI(domElements, {
             socket = await connectWebSocket({
                 currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
                 displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
-                handlePeerList, handleNewPeer, removeParticipant, localStream
+                handlePeerList, handleNewPeer, removeParticipant, localStream, action: "join"
             });
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay for stability
+            await new Promise(resolve => setTimeout(resolve, 1000));
             console.log("WebSocket connection delay completed, proceeding with room join");
             await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
             enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
@@ -362,7 +360,6 @@ export function setupUI(domElements, {
         }
     });
 
-    // Initially disable chat until a room is joined or created
     disableChat(sendButton, chatInput, sendMessageCallback);
 
     return { addDragListeners, removeParticipant, removeAllParticipants };
