@@ -176,9 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn("WebSocket connection timed out, retrying...");
                 socket.close();
                 socket = null;
-                setTimeout(() => connectWebSocket(), 1000);
+                setTimeout(() => connectWebSocket(), 15000);
             }
-        }, 1000); // 5-second timeout
+        }, 15000); // 5-second timeout
     }
 
     // Get a unique, persistent peer ID for the current user
