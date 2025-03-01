@@ -3,16 +3,14 @@ let socket = null;
 
 export async function connectWebSocket({
     currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
-    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream
+    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream, action = "join"
 }) {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
         console.warn("WebSocket already connected or connecting, skipping...");
         return socket;
     }
 
-    // const WEBSOCKET_URL = "ws://127.0.0.1:5000";
-
-    const WEBSOCKET_URL="wss://webparty-1.onrender.com";  /// for production 
+    const WEBSOCKET_URL = window.WEBSOCKET_URL;
 
     return new Promise((resolve, reject) => {
         socket = new WebSocket(WEBSOCKET_URL);
@@ -23,13 +21,14 @@ export async function connectWebSocket({
             clearTimeout(connectTimeout);
             console.log("✅ WebSocket Connected to:", WEBSOCKET_URL);
             if (currentRoomId && myPeerId) {
+                const messageType = action === "create" ? "createRoom" : "join";
                 const joinMessage = { 
-                    type: "join", 
+                    type: messageType, 
                     roomId: currentRoomId, 
                     peerId: myPeerId, 
                     roomType: roomType || 'private' 
                 };
-                console.log(`Sending join with peerId: ${myPeerId}, roomId: ${currentRoomId}, roomType: ${roomType || 'private'}`, joinMessage);
+                console.log(`Sending ${messageType} with peerId: ${myPeerId}, roomId: ${currentRoomId}, roomType: ${roomType || 'private'}`, joinMessage);
                 socket.send(JSON.stringify(joinMessage));
             }
             resolve(socket);
@@ -44,7 +43,7 @@ export async function connectWebSocket({
             if (currentRoomId) {
                 setTimeout(() => connectWebSocket({
                     currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
-                    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream
+                    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream, action
                 }), 15000);
             }
             reject(new Error("WebSocket closed unexpectedly"));
@@ -84,12 +83,13 @@ export async function connectWebSocket({
                     myPeerId = null;
                     connectWebSocket({ 
                         currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
-                        displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream
+                        displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream, action
                     });
                 } else if (data.message.includes("Private room is full")) {
                     alert("This private room is full (max 2 users). Please try another room or create a new one.");
+                } else {
+                    alert(`Server error: ${data.message}. Please try again or contact support.`);
                 }
-                alert(`Server error: ${data.message}. Please try again or contact support.`);
             }
         };
 
@@ -105,7 +105,7 @@ export async function connectWebSocket({
             if (currentRoomId) {
                 setTimeout(() => connectWebSocket({
                     currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
-                    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream
+                    displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream, action
                 }), 10000);
             }
             reject(new Error(`WebSocket error: ${error.message || 'Unknown error'}`));

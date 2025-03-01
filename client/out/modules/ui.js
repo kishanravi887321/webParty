@@ -83,6 +83,44 @@ export function setupUI(domElements, {
         }
     }
 
+    // Helper function to check if a room exists
+    async function checkRoomExists(roomId) {
+        return new Promise((resolve, reject) => {
+            // Use existing socket or create a temporary one
+            const ws = socket && socket.readyState === WebSocket.OPEN ? socket : new WebSocket(window.WEBSOCKET_URL);
+            let timeoutId;
+
+            ws.onopen = () => {
+                console.log("Checking room existence for:", roomId);
+                ws.send(JSON.stringify({ type: "checkRoom", roomId }));
+                timeoutId = setTimeout(() => {
+                    reject(new Error("Room check timeout"));
+                    ws.close();
+                }, 5000); // 5-second timeout
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === "roomStatus" && data.roomId === roomId) {
+                    clearTimeout(timeoutId);
+                    resolve(data.exists);
+                    if (!socket) ws.close(); // Close temporary connection if not reusing
+                }
+            };
+
+            ws.onerror = (error) => {
+                clearTimeout(timeoutId);
+                reject(error);
+                if (!socket) ws.close();
+            };
+
+            // If using existing socket, ensure it's ready
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "checkRoom", roomId }));
+            }
+        });
+    }
+
     // Create/Join Room
     createRoomBtn.addEventListener('click', async () => {
         console.log("Create Room button clicked");
@@ -91,19 +129,19 @@ export function setupUI(domElements, {
             alert('Please select a room type');
             return;
         }
-    
+
         const roomType = selectedRoom.dataset.type;
         currentRoomId = generateRoomId();
         document.getElementById('roomTitle').textContent = `${roomType.charAt(0).toUpperCase() + roomType.slice(1)} Room`;
         document.getElementById('generatedRoomId').textContent = currentRoomId;
         roomModal.classList.remove('active');
-    
+
         const mediaStream = await initializeMedia();
         if (!mediaStream) {
             alert("Media access is required to create a room. Please grant camera/microphone permissions.");
             return;
         }
-    
+
         localStream = mediaStream;
         myPeerId = getMyPeerId();
         initializeVideoCircles();
@@ -114,17 +152,15 @@ export function setupUI(domElements, {
             localControls.forEach(btn => btn.dataset.peerId = myPeerId);
             addControlListeners(myPeerId);
         }
-    
+
         try {
             socket = await connectWebSocket({
                 currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
                 displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
                 handlePeerList, handleNewPeer, removeParticipant, localStream
             });
-            // Add a delay to ensure WebSocket connection stabilizes
-            await new Promise(resolve => setTimeout(resolve, 8000)); // 1-second delay
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay for stability
             console.log("WebSocket connection delay completed, proceeding with room setup");
-    
             await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
             enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
             console.log(`Room created successfully: ${currentRoomId}, Type: ${roomType}`);
@@ -134,6 +170,7 @@ export function setupUI(domElements, {
             roomModal.classList.add('active');
         }
     });
+
     // Control Button Functionality with Mute and Video Toggling
     function addControlListeners(peerId) {
         console.log(`Adding control listeners for peer: ${peerId}`);
@@ -141,7 +178,7 @@ export function setupUI(domElements, {
         controls.forEach(button => {
             button.addEventListener('click', () => {
                 const type = button.dataset.type;
-                if (peerId === myPeerId) { // Only allow toggling for local peer
+                if (peerId === myPeerId) {
                     if (type === 'mic') {
                         toggleMute(peerId, button);
                     } else if (type === 'videocam') {
@@ -271,45 +308,56 @@ export function setupUI(domElements, {
         }
 
         const roomType = selectedRoom.dataset.type;
-        currentRoomId = prompt('Enter room ID:');
-        if (!currentRoomId) {
+        const roomId = prompt('Enter room ID:');
+        if (!roomId) {
             console.log("No Room ID entered, aborting join");
             return;
         }
 
-        document.getElementById('roomTitle').textContent = `${roomType.charAt(0).toUpperCase() + roomType.slice(1)} Room`;
-        document.getElementById('generatedRoomId').textContent = currentRoomId;
-        roomModal.classList.remove('active');
-
-        const mediaStream = await initializeMedia();
-        if (!mediaStream) {
-            alert("Media access is required to join a room. Please grant camera/microphone permissions.");
-            return;
-        }
-
-        localStream = mediaStream;
-        myPeerId = getMyPeerId();
-        initializeVideoCircles();
-        const localParticipant = document.querySelector('.participant:nth-child(1)');
-        if (localParticipant) {
-            localParticipant.dataset.peerId = myPeerId;
-            const localControls = localParticipant.querySelectorAll('.control-btn');
-            localControls.forEach(btn => btn.dataset.peerId = myPeerId);
-            addControlListeners(myPeerId);
-        }
-
         try {
+            // Check if the room exists before proceeding
+            const roomExists = await checkRoomExists(roomId);
+            if (!roomExists) {
+                console.log(`Room ${roomId} does not exist`);
+                alert("Room ID is incorrect or does not exist");
+                return; // Keep roomModal active
+            }
+
+            currentRoomId = roomId;
+            document.getElementById('roomTitle').textContent = `${roomType.charAt(0).toUpperCase() + roomType.slice(1)} Room`;
+            document.getElementById('generatedRoomId').textContent = currentRoomId;
+            roomModal.classList.remove('active');
+
+            const mediaStream = await initializeMedia();
+            if (!mediaStream) {
+                alert("Media access is required to join a room. Please grant camera/microphone permissions.");
+                return;
+            }
+
+            localStream = mediaStream;
+            myPeerId = getMyPeerId();
+            initializeVideoCircles();
+            const localParticipant = document.querySelector('.participant:nth-child(1)');
+            if (localParticipant) {
+                localParticipant.dataset.peerId = myPeerId;
+                const localControls = localParticipant.querySelectorAll('.control-btn');
+                localControls.forEach(btn => btn.dataset.peerId = myPeerId);
+                addControlListeners(myPeerId);
+            }
+
             socket = await connectWebSocket({
                 currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
                 displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
                 handlePeerList, handleNewPeer, removeParticipant, localStream
             });
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay for stability
+            console.log("WebSocket connection delay completed, proceeding with room join");
             await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
             enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
             console.log(`Joined room successfully: ${currentRoomId}, Type: ${roomType}`);
         } catch (error) {
             console.error("Error joining room:", error);
-            alert("Failed to join room. Please check your network or try again.");
+            alert(`Failed to join room: ${error.message || 'Unknown error'}. Please check your network or try again.`);
             roomModal.classList.add('active');
         }
     });
