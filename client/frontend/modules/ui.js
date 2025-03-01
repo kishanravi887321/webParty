@@ -10,6 +10,9 @@ export function setupUI(domElements, {
         createRoomBtn, joinRoomBtn, participantsContainer, initializeVideoCircles, getMyPeerId
     } = domElements;
 
+    // Define the sendMessage callback once for consistency
+    const sendMessageCallback = (chatInput) => sendMessage(chatInput, socket, currentRoomId, username, displayMessage, chatMessages, myPeerId);
+
     // Modal controls
     loginBtn.addEventListener('click', () => {
         if (authModal) {
@@ -119,7 +122,7 @@ export function setupUI(domElements, {
                 handlePeerList, handleNewPeer, removeParticipant, localStream
             });
             await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
-            enableChat(sendButton, chatInput, (chatInput) => sendMessage(chatInput, socket, currentRoomId, username, displayMessage, chatMessages, myPeerId), chatMessages);
+            enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
             console.log(`Room created successfully: ${currentRoomId}, Type: ${roomType}`);
         } catch (error) {
             console.error("Error creating room:", error);
@@ -299,7 +302,7 @@ export function setupUI(domElements, {
                 handlePeerList, handleNewPeer, removeParticipant, localStream
             });
             await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
-            enableChat(sendButton, chatInput, (chatInput) => sendMessage(chatInput, socket, currentRoomId, username, displayMessage, chatMessages, myPeerId), chatMessages);
+            enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
             console.log(`Joined room successfully: ${currentRoomId}, Type: ${roomType}`);
         } catch (error) {
             console.error("Error joining room:", error);
@@ -307,6 +310,9 @@ export function setupUI(domElements, {
             roomModal.classList.add('active');
         }
     });
+
+    // Initially disable chat until a room is joined or created
+    disableChat(sendButton, chatInput, sendMessageCallback);
 
     return { addDragListeners, removeParticipant, removeAllParticipants };
 }

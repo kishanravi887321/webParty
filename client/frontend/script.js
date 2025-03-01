@@ -45,6 +45,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial setup
     myPeerId = domElements.getMyPeerId();
-    disableChat();
     domElements.initializeVideoCircles();
 });

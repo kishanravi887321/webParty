@@ -20,9 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize DOM and UI
     const domElements = setupDOM();
-    const { sendButton, chatInput } = domElements; // Extract sendButton and chatInput
-    const sendMessageCallback = (chatInput) => sendMessage(chatInput, socket, currentRoomId, username, displayMessage, domElements.chatMessages, myPeerId);
-
     setupUI(domElements, {
         connectWebSocket,
         initializeMedia,
@@ -48,6 +45,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial setup
     myPeerId = domElements.getMyPeerId();
-    disableChat(sendButton, chatInput, sendMessageCallback); // Pass correct arguments
     domElements.initializeVideoCircles();
 });
