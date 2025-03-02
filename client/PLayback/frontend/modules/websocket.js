@@ -1,4 +1,5 @@
-let socket=null;
+let socket = null;
+
 export async function connectWebSocket({
     currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
     displayMessage, peerConnections, peerList, initializeVideoCircles, handlePeerList, handleNewPeer, removeParticipant, chatMessages, localStream, action = "join"
@@ -8,7 +9,6 @@ export async function connectWebSocket({
         return socket;
     }
     const WEBSOCKET_URL = "ws://127.0.0.1:5000";  // No SSL for local testing
-
 
     return new Promise((resolve, reject) => {
         socket = new WebSocket(WEBSOCKET_URL);
@@ -69,11 +69,27 @@ export async function connectWebSocket({
                 updateLeaderDisplay(data.leaderPeerId);
             } else if (data.type === "roomClosed") {
                 console.log(`Room ${data.roomId} closed: ${data.message}`);
-                alert(`Room ${data.roomId} has been closed: ${data.message}`);
+                alert(`Room ${data.roomId} Closed`);
                 window.location.reload(); // Simple reset, adjust as needed
             } else if (data.type === "error") {
                 console.error("Server error:", data.message);
                 alert(`Server error: ${data.message}. Please try again or contact support.`);
+            } else if (data.type === "videoURL") {
+                console.log(`Received video URL from ${data.peerId} for room ${data.roomId}`);
+                socket.send(JSON.stringify({
+                    type: "videoURL",
+                    roomId: data.roomId,
+                    peerId: data.peerId,
+                    url: data.url
+                }));
+            } else if (data.type === "videoPlay" || data.type === "videoPause" || data.type === "videoSeek") {
+                console.log(`Received ${data.type} from ${data.peerId} for room ${data.roomId} at time ${data.time}`);
+                socket.send(JSON.stringify({
+                    type: data.type,
+                    roomId: data.roomId,
+                    peerId: data.peerId,
+                    time: data.time
+                }));
             }
         };
 

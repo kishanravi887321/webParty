@@ -185,19 +185,117 @@ export function setupUI(domElements, {
     });
 
     // Re-check and re-apply event listener if DOM changes
-    function ensureShowButtonListener() {
+    function ensureShowButtonListener(isCreator = false) {
         const showUserListBtn = document.getElementById('showUserListBtn');
+        const videoUrlInput = document.getElementById('videoUrl'); // Reference to existing video URL input
+        const submitVideoBtn = document.getElementById('submitVideoUrl'); // Reference to submit video button
+    
+        // Existing showUserListBtn logic
         if (showUserListBtn && !showUserListBtn.listenerAttached) {
             showUserListBtn.removeEventListener('click', showUserListHandler);
             showUserListBtn.addEventListener('click', showUserListHandler);
             showUserListBtn.listenerAttached = true;
             console.log("Re-applied Show Users button event listener");
         }
-    }
+    
+        // Handle the existing video URL input and submit button only for the room creator
+        if (isCreator && myPeerId === currentLeader) {
+            if (videoUrlInput) {
+                // Make the input visible (in case it's hidden)
+                videoUrlInput.style.display = 'block';
+                // Enable the input by removing the disabled attribute
+                videoUrlInput.removeAttribute('disabled');
+            }
 
-    // Call ensureShowButtonListener when the DOM might change (e.g., after room creation/join)
-    createRoomBtn.addEventListener('click', () => ensureShowButtonListener());
-    joinRoomBtn.addEventListener('click', () => ensureShowButtonListener());
+            if (submitVideoBtn) {
+                // Make the button visible (in case it's hidden)
+                submitVideoBtn.style.display = 'block';
+                // Ensure the button is enabled (remove disabled if present)
+                submitVideoBtn.removeAttribute('disabled'); // Only if it’s disabled in HTML or elsewhere
+            }
+        } else {
+            // Hide and disable for non-creators (joiners)
+            if (videoUrlInput) {
+                videoUrlInput.style.display = 'none';
+                videoUrlInput.setAttribute('disabled', 'disabled');
+            }
+            if (submitVideoBtn) {
+                submitVideoBtn.style.display = 'none';
+                submitVideoBtn.setAttribute('disabled', 'disabled');
+            }
+        }
+    }
+    
+    // Call ensureShowButtonListener when creating or joining a room
+    createRoomBtn.addEventListener('click', () => {
+        ensureShowButtonListener(true); // Pass true to indicate the user is the creator
+    });
+
+    joinRoomBtn.addEventListener('click', async () => {
+        ensureShowButtonListener(false); // Pass false to indicate the user is joining (not the creator)
+        
+        console.log("Join Room button clicked");
+        const selectedRoom = document.querySelector('.room-option.selected');
+        if (!selectedRoom) {
+            alert('Please select a room type');
+            return;
+        }
+
+        const roomType = selectedRoom.dataset.type;
+        const roomId = prompt('Enter room ID:');
+        if (!roomId) {
+            console.log("No Room ID entered, aborting join");
+            return;
+        }
+
+        try {
+            const roomExists = await checkRoomExists(roomId);
+            if (!roomExists) {
+                console.log(`Room ${roomId} does not exist`);
+                alert("Room ID is incorrect or does not exist");
+                return;
+            }
+
+            currentRoomId = roomId;
+            document.getElementById('roomTitle').textContent = roomType === 'private' ? 'Private Room' : 'Normal Room';
+            document.getElementById('generatedRoomId').textContent = currentRoomId;
+            roomModal.classList.remove('active');
+
+            const mediaStream = await initializeMedia();
+            if (!mediaStream) {
+                alert("Media access is required to join a room. Please grant camera/microphone permissions.");
+                return;
+            }
+
+            localStream = mediaStream;
+            myPeerId = getMyPeerId();
+            initializeVideoCircles();
+            const localParticipant = document.querySelector('.participant:nth-child(1)');
+            if (localParticipant) {
+                localParticipant.dataset.peerId = myPeerId;
+                const localControls = localParticipant.querySelectorAll('.control-btn');
+                localControls.forEach(btn => btn.dataset.peerId = myPeerId);
+                addControlListeners(myPeerId);
+            }
+
+            socket = await connectWebSocket({
+                currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
+                displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
+                handlePeerList, handleNewPeer, removeParticipant, localStream, action: "join"
+            });
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("WebSocket connection delay completed, proceeding with room join");
+            await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
+            enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
+            currentLeader = null; // Will be updated by peerList or leaderUpdate
+            updateUserList(true); // Initialize user list for all users, shown by default
+            console.log(`Joined room successfully: ${currentRoomId}, Type: ${roomType}`);
+        } catch (error) {
+            console.error("Error joining room:", error);
+            alert(`Failed to join room: ${error.message || 'Unknown error'}. Please check your network or try again.`);
+            roomModal.classList.add('active');
+        }
+    });
 
     function transferLeadership(toPeerId) {
         if (myPeerId === currentLeader && socket && socket.readyState === WebSocket.OPEN) {
@@ -218,6 +316,9 @@ export function setupUI(domElements, {
         currentLeader = leaderPeerId;
         updateUserList(true); // Refresh user list to reflect new leader, shown by default
         console.log(`Leader updated to: ${leaderPeerId}`);
+        
+        // Re-evaluate visibility of video URL input and submit button based on new leader
+        ensureShowButtonListener(myPeerId === leaderPeerId);
     }
 
     createRoomBtn.addEventListener('click', async () => {
@@ -264,6 +365,9 @@ export function setupUI(domElements, {
             currentLeader = myPeerId; // Set creator as initial leader
             updateUserList(true); // Initialize user list for all users, shown by default
             console.log(`Room created successfully: ${currentRoomId}, Type: ${roomType}`);
+            
+            // Show and enable video URL input and submit button for the creator
+            ensureShowButtonListener(true);
         } catch (error) {
             console.error("Error creating room:", error);
             alert(`Failed to create room: ${error.message || 'Unknown error'}. Please check your network or contact support if the issue persists.`);
@@ -376,6 +480,9 @@ export function setupUI(domElements, {
         startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
         // Ensure user list is updated for all users, shown by default
         updateUserList(true);
+        
+        // Re-evaluate visibility of video URL input and submit button based on current leadership
+        ensureShowButtonListener(myPeerId === currentLeader);
     }
 
     function handleNewPeer(newPeerId) {
@@ -401,78 +508,11 @@ export function setupUI(domElements, {
             }, 2000);
             // Update user list for all users when a new peer joins, shown by default
             updateUserList(true);
+            
+            // Re-evaluate visibility of video URL input and submit button based on current leadership
+            ensureShowButtonListener(myPeerId === currentLeader);
         }
     }
-
-    function handleLeaderUpdate(leaderPeerId) {
-        currentLeader = leaderPeerId;
-        updateUserList(true); // Refresh user list to reflect new leader, shown by default
-        console.log(`Leader updated to: ${leaderPeerId}`);
-    }
-
-    joinRoomBtn.addEventListener('click', async () => {
-        console.log("Join Room button clicked");
-        const selectedRoom = document.querySelector('.room-option.selected');
-        if (!selectedRoom) {
-            alert('Please select a room type');
-            return;
-        }
-
-        const roomType = selectedRoom.dataset.type;
-        const roomId = prompt('Enter room ID:');
-        if (!roomId) {
-            console.log("No Room ID entered, aborting join");
-            return;
-        }
-
-        try {
-            const roomExists = await checkRoomExists(roomId);
-            if (!roomExists) {
-                console.log(`Room ${roomId} does not exist`);
-                alert("Room ID is incorrect or does not exist");
-                return;
-            }
-
-            currentRoomId = roomId;
-            document.getElementById('roomTitle').textContent = roomType === 'private' ? 'Private Room' : 'Normal Room';
-            document.getElementById('generatedRoomId').textContent = currentRoomId;
-            roomModal.classList.remove('active');
-
-            const mediaStream = await initializeMedia();
-            if (!mediaStream) {
-                alert("Media access is required to join a room. Please grant camera/microphone permissions.");
-                return;
-            }
-
-            localStream = mediaStream;
-            myPeerId = getMyPeerId();
-            initializeVideoCircles();
-            const localParticipant = document.querySelector('.participant:nth-child(1)');
-            if (localParticipant) {
-                localParticipant.dataset.peerId = myPeerId;
-                const localControls = localParticipant.querySelectorAll('.control-btn');
-                localControls.forEach(btn => btn.dataset.peerId = myPeerId);
-                addControlListeners(myPeerId);
-            }
-
-            socket = await connectWebSocket({
-                currentRoomId, myPeerId, roomType, handleOffer, handleAnswer, handleCandidate,
-                displayMessage, peerConnections, peerList, initializeVideoCircles, chatMessages,
-                handlePeerList, handleNewPeer, removeParticipant, localStream, action: "join"
-            });
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log("WebSocket connection delay completed, proceeding with room join");
-            await startCallForRoom(myPeerId, peerList, socket, currentRoomId, peerConnections, removeParticipant);
-            enableChat(sendButton, chatInput, sendMessageCallback, chatMessages);
-            currentLeader = null; // Will be updated by peerList or leaderUpdate
-            updateUserList(true); // Initialize user list for all users, shown by default
-            console.log(`Joined room successfully: ${currentRoomId}, Type: ${roomType}`);
-        } catch (error) {
-            console.error("Error joining room:", error);
-            alert(`Failed to join room: ${error.message || 'Unknown error'}. Please check your network or try again.`);
-            roomModal.classList.add('active');
-        }
-    });
 
     disableChat(sendButton, chatInput, sendMessageCallback);
 

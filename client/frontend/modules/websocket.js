@@ -69,7 +69,7 @@ export async function connectWebSocket({
                 updateLeaderDisplay(data.leaderPeerId);
             } else if (data.type === "roomClosed") {
                 console.log(`Room ${data.roomId} closed: ${data.message}`);
-                alert(`Room ${data.roomId} has been closed: ${data.message}`);
+                alert(`Room ${data.roomId}  closed`);
                 window.location.reload(); // Simple reset, adjust as needed
             } else if (data.type === "error") {
                 console.error("Server error:", data.message);

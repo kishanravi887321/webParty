@@ -37,6 +37,18 @@ body {
     z-index: 100;
 }
 
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
@@ -50,11 +62,6 @@ body {
     background: linear-gradient(45deg, var(--neon-primary), var(--neon-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-}
-
-.nav-buttons {
-    display: flex;
-    gap: 1rem;
 }
 
 .btn {
@@ -78,6 +85,50 @@ body {
 
 .btn .material-icons {
     font-size: 20px;
+}
+
+/* Video URL Section in Nav */
+.video-url-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#videoUrl {
+    padding: 0.5rem;
+    border: 1px solid var(--glass-border);
+    background: var(--darker-bg);
+    color: #0f0;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    width: 200px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#videoUrl:focus {
+    outline: none;
+    border-color: var(--neon-primary);
+    box-shadow: 0 0 10px rgba(0, 255, 242, 0.2);
+}
+
+#submitVideoUrl {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(45deg, var(--neon-primary), var(--neon-purple));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#submitVideoUrl:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 255, 242, 0.3);
+}
+
+#submitVideoUrl .material-icons {
+    font-size: 18px;
+    vertical-align: middle;
 }
 
 /* Modal Styles */
@@ -505,25 +556,46 @@ body {
 
 .video-container {
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 70px - 2rem); /* Full height minus nav height and padding */
     background: #000;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#mainVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    border-radius: 12px;
+    display: none; /* Hidden by default, shown via JS */
+}
+
+#mainVideo[controls] {
+    display: block; /* Ensure controls are visible for leader */
+}
+
+#mainVideo:not([controls]) {
+    pointer-events: none; /* Prevent interaction for non-leaders */
 }
 
 /* Participant Videos */
 .participants {
     position: absolute;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 1rem;
+    right: 1rem;
     display: flex;
     gap: 1rem;
+    z-index: 10; /* Ensure it stays above video */
 }
 
 .participant {
-    width: 120px;
-    height: 120px;
+    width: 100px; /* Reduced size to avoid overlapping with larger video */
+    height: 100px;
     border-radius: 50%;
     overflow: hidden;
     cursor: move;

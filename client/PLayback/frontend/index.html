@@ -17,10 +17,19 @@
 <body>
     <!-- Navigation -->
     <nav class="nav">
-        <div class="logo">
-            <span>Web</span><span>Party</span>
+        <div class="nav-left">
+            <div class="logo">
+                <span>Web</span><span>Party</span>
+            </div>
+            <div class="video-url-section">
+                <input type="url" id="videoUrl" placeholder="Paste Video URL (e.g., YouTube)" style="margin-right: 10px;display: none;">
+                <button class="btn" id="submitVideoUrl" style="display: none;">
+                    <span class="material-icons" >play_circle_outline</span>
+                    Play
+                </button>
+            </div>
         </div>
-        <div class="nav-buttons">
+        <div class="nav-right">
             <button class="btn" id="selectRoomBtn">
                 <span class="material-icons">meeting_room</span>
                 Select Room

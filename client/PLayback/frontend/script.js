@@ -1,50 +1,62 @@
 // script.js
-import { setupDOM } from './modules/dom.js';
-import { connectWebSocket } from './modules/websocket.js';
-import { initializeMedia, createPeerConnection, handleOffer, handleAnswer, handleCandidate, startCallForRoom } from './modules/webrtc.js';
-import { sendMessage, displayMessage, enableChat, disableChat } from './modules/chat.js';
 import { setupUI } from './modules/ui.js';
+import { connectWebSocket, handleOffer, handleAnswer, handleCandidate } from './modules/websocket.js';
+import { initializeMedia, startCallForRoom } from './modules/media.js';
+import { sendMessage, displayMessage, enableChat, disableChat } from './modules/chat.js';
 import { generateRoomId } from './modules/utils.js';
 
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Global variables
-    let localStream;
-    let username = "You";
-    let token = null;
-    let currentRoomId = null;
-    const peerConnections = new Map();
-    let peerList = new Set();
-    let myPeerId = null;
-    let socket = null;
+// DOM elements
+const domElements = {
+    loginBtn: document.getElementById('loginBtn'),
+    selectRoomBtn: document.getElementById('selectRoomBtn'),
+    authModal: document.getElementById('authModal'),
+    roomModal: document.getElementById('roomModal'),
+    closeButtons: document.querySelectorAll('.close-btn'),
+    authTabs: document.querySelectorAll('.auth-tab'),
+    authForms: document.querySelectorAll('.auth-form'),
+    roomOptions: document.querySelectorAll('.room-option'),
+    localVideo: document.getElementById('localVideo'),
+    chatInput: document.querySelector('.chat-input input'),
+    sendButton: document.querySelector('.chat-input .control-btn'),
+    chatMessages: document.querySelector('.chat-messages'),
+    loginForm: document.getElementById('loginForm'),
+    registerForm: document.getElementById('registerForm'),
+    createRoomBtn: document.getElementById('createRoomBtn'),
+    joinRoomBtn: document.getElementById('joinRoomBtn'),
+    participantsContainer: document.querySelector('.participants'),
+    initializeVideoCircles: () => {}, // Placeholder or implement as needed
+    getMyPeerId: () => myPeerId // Implement or pass as a function
+};
 
-    // Initialize DOM and UI
-    const domElements = setupDOM();
-    setupUI(domElements, {
-        connectWebSocket,
-        initializeMedia,
-        createPeerConnection,
-        handleOffer,
-        handleAnswer,
-        handleCandidate,
-        startCallForRoom,
-        sendMessage,
-        displayMessage,
-        enableChat,
-        disableChat,
-        generateRoomId,
-        localStream,
-        username,
-        token,
-        currentRoomId,
-        peerConnections,
-        peerList,
-        myPeerId,
-        socket
-    });
+// State
+let localStream = null;
+let username = null;
+let token = null;
+let currentRoomId = null;
+let peerConnections = new Map();
+let peerList = new Set();
+let myPeerId = null;
 
-    // Initial setup
-    myPeerId = domElements.getMyPeerId();
-    disableChat();
-    domElements.initializeVideoCircles();
+// Setup UI with all necessary functions and state
+setupUI(domElements, {
+    connectWebSocket,
+    initializeMedia,
+    createPeerConnection,
+    handleOffer,
+    handleAnswer,
+    handleCandidate,
+    startCallForRoom,
+    sendMessage,
+    displayMessage,
+    enableChat,
+    disableChat,
+    generateRoomId,
+    localStream,
+    username,
+    token,
+    currentRoomId,
+    peerConnections,
+    peerList,
+    myPeerId,
+    socket: null // Will be set by connectWebSocket
 });

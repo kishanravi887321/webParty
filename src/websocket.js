@@ -173,7 +173,7 @@ export const setupWebSocket = (server) => {
                 return;
             }
 
-            // Handle other messages (chat, WebRTC signaling)
+            // Handle video synchronization messages
             const roomId = ws.roomId;
             if (!roomId || !rooms.has(roomId)) {
                 console.log("⚠️ Client not in a room or invalid room:", roomId);
@@ -184,6 +184,28 @@ export const setupWebSocket = (server) => {
             const userCount = room.peers.size;
             console.log(`Broadcasting ${data.type} from ${ws.peerId} in room ${roomId} to other peers, Total users: ${userCount}, Room type: ${room.type}`);
 
+            // Restrict video control messages to the room leader
+            if (['videoURL', 'videoPlay', 'videoPause', 'videoSeek'].includes(data.type)) {
+                if (ws.peerId !== room.leader) {
+                    console.log(`Non-leader ${ws.peerId} tried to send ${data.type} in room ${roomId}. Ignoring.`);
+                    ws.send(JSON.stringify({ type: "error", message: "Only the room leader can control video playback." }));
+                    return;
+                }
+            }
+
+            if (data.type === "videoURL" || data.type === "videoPlay" || data.type === "videoPause" || data.type === "videoSeek") {
+                data.peerId = ws.peerId;
+                data.roomType = room.type;
+
+                wss.clients.forEach((client) => {
+                    if (client.roomId === roomId && client.peerId !== ws.peerId && client.readyState === client.OPEN) {
+                        client.send(JSON.stringify(data));
+                    }
+                });
+                return;
+            }
+
+            // Handle other messages (chat, WebRTC signaling)
             if (data.type === "chat") {
                 data.peerId = ws.peerId;
                 data.roomType = room.type;
