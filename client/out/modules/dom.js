@@ -28,36 +28,73 @@ export function setupDOM() {
     }
 
     // Initialize two static video circles for local and remote users
-    function initializeVideoCircles() {
+    function initializeVideoCircles(localStream) {
         try {
-            participantsContainer.innerHTML = '';
-
-            const localParticipant = document.createElement('div');
-            localParticipant.classList.add('participant');
-            localParticipant.dataset.peerId = '';
-            localParticipant.draggable = true;
-            localParticipant.innerHTML = `
-                <video id="localVideo" autoplay muted></video>
-                <div class="controls">
-                    <button class="control-btn" data-peer-id="" data-type="mic"><span class="material-icons">mic</span></button>
-                    <button class="control-btn" data-peer-id="" data-type="videocam"><span class="material-icons">videocam</span></button>
-                </div>
-            `;
-            participantsContainer.appendChild(localParticipant);
-
-            const remoteParticipant = document.createElement('div');
-            remoteParticipant.classList.add('participant');
-            remoteParticipant.dataset.peerId = '';
-            remoteParticipant.draggable = true;
-            remoteParticipant.innerHTML = `
-                <video id="remoteVideo" autoplay></video>
-                <div class="controls">
-                    <button class="control-btn" data-peer-id="" data-type="mic"><span class="material-icons">mic</span></button>
-                    <button class="control-btn" data-peer-id="" data-type="videocam"><span class="material-icons">videocam</span></button>
-                </div>
-            `;
-            participantsContainer.appendChild(remoteParticipant);
-
+            // Don’t clear the entire container; instead, remove only outdated participants
+            const existingParticipants = participantsContainer.querySelectorAll('.participant');
+            existingParticipants.forEach(participant => {
+                if (!participant.querySelector('#localVideo') && !participant.querySelector('#remoteVideo')) {
+                    participant.remove(); // Remove participants that don’t contain localVideo or remoteVideo
+                }
+            });
+    
+            let localParticipant, remoteParticipant;
+    
+            // Check if localVideo already exists
+            let localVideoElement = document.getElementById('localVideo');
+            if (!localVideoElement) {
+                localParticipant = document.createElement('div');
+                localParticipant.classList.add('participant');
+                localParticipant.dataset.peerId = '';
+                localParticipant.draggable = true;
+                localParticipant.innerHTML = `
+                    <video id="localVideo" autoplay muted></video>
+                    <div class="controls">
+                        <button class="control-btn" data-peer-id="" data-type="mic"><span class="material-icons">mic</span></button>
+                        <button class="control-btn" data-peer-id="" data-type="videocam"><span class="material-icons">videocam</span></button>
+                    </div>
+                `;
+                participantsContainer.appendChild(localParticipant);
+                localVideoElement = localParticipant.querySelector('#localVideo');
+            } else {
+                localParticipant = localVideoElement.closest('.participant');
+            }
+    
+            // Check if remoteVideo already exists
+            let remoteVideoElement = document.getElementById('remoteVideo');
+            if (!remoteVideoElement) {
+                remoteParticipant = document.createElement('div');
+                remoteParticipant.classList.add('participant');
+                remoteParticipant.dataset.peerId = '';
+                remoteParticipant.draggable = true;
+                remoteParticipant.innerHTML = `
+                    <video id="remoteVideo" autoplay></video>
+                    <div class="controls">
+                        <button class="control-btn" data-peer-id="" data-type="mic"><span class="material-icons">mic</span></button>
+                        <button class="control-btn" data-peer-id="" data-type="videocam"><span class="material-icons">videocam</span></button>
+                    </div>
+                `;
+                participantsContainer.appendChild(remoteParticipant);
+                remoteVideoElement = remoteParticipant.querySelector('#remoteVideo');
+            } else {
+                remoteParticipant = remoteVideoElement.closest('.participant');
+            }
+    
+            // Reassign the local stream if it exists
+            if (localStream && localVideoElement) {
+                localVideoElement.srcObject = localStream;
+                localVideoElement.muted = true;
+                localVideoElement.play().catch(error => {
+                    console.error("Error playing local video in initializeVideoCircles:", error);
+                });
+            }
+    
+            // Ensure remoteVideo is cleared if no remote stream is present
+            if (remoteVideoElement && !remoteVideoElement.srcObject) {
+                remoteVideoElement.srcObject = null;
+            }
+    
+            console.log("initializeVideoCircles executed, localVideo.srcObject:", localVideoElement.srcObject);
             return { localParticipant, remoteParticipant };
         } catch (error) {
             console.error("Error initializing video circles:", error);

@@ -1,37 +1,60 @@
-// modules/webrtc.js
 let localStream = null;
+
+// Utility to stop media tracks
+export function stopMediaTracks(stream) {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        console.log("🛑 Media tracks stopped");
+    }
+}
 
 export async function initializeMedia() {
     try {
-        if (!localStream) {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            console.log("✅ Camera and microphone access granted");
-            const localVideoElement = document.getElementById('localVideo');
-            if (localVideoElement) localVideoElement.srcObject = localStream;
+        // Clean up any existing stream
+        if (localStream) {
+            stopMediaTracks(localStream);
+            localStream = null;
         }
+
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        console.log("✅ Camera and microphone access granted");
+        const localVideoElement = document.getElementById('localVideo');
+        if (localVideoElement) {
+            localVideoElement.srcObject = localStream;
+            localVideoElement.play().catch(error => {
+                console.error("Error playing local video:", error);
+            });
+        }
+        return localStream;
     } catch (error) {
         console.error("❌ Error Getting Media:", error);
-        if (error.name === "NotAllowedError" || error.name === "NotFoundError") {
-            alert("Camera or microphone access denied or already in use. Please close other applications or grant permissions.");
-            return null;
+        if (error.name === "NotAllowedError") {
+            alert("Permission denied: Please grant camera and microphone access in your browser settings and refresh the page.");
+        } else if (error.name === "NotFoundError") {
+            alert("No camera or microphone found: Please connect a device and refresh the page.");
         } else {
-            alert("Failed to access camera/microphone. Please grant permissions or check your setup.");
-            return null;
+            alert(`Failed to access camera/microphone: ${error.message}. Please check your setup.`);
         }
+
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
             const localVideoElement = document.getElementById('localVideo');
-            if (localVideoElement) localVideoElement.srcObject = null;
+            if (localVideoElement) {
+                localVideoElement.srcObject = null;
+                localVideoElement.style.background = "black"; // Visual cue for audio-only
+                localVideoElement.style.display = "block";
+            }
             console.warn("Falling back to audio-only due to camera access issues");
             return localStream;
         } catch (fallbackError) {
             console.error("❌ Fallback failed:", fallbackError);
+            alert("Failed to access audio as fallback. Please check your microphone setup.");
             return null;
         }
     }
-    return localStream;
 }
 
+// Rest of your webrtc.js functions (unchanged for now)
 export function createPeerConnection(peerId, localStream, socket, currentRoomId, peerConnections, myPeerId, removeParticipant, peerList) {
     if (!peerConnections) {
         console.error("peerConnections is undefined in createPeerConnection");
