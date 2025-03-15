@@ -21,12 +21,12 @@ app.use(express.json());
 // app.use(cors({ origin: 'http://127.0.0.1:5000', credentials: true }))
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5501', // Allow access from anywhere
+    origin: ['http://127.0.0.1:5501', 'https://webparty-3.onrender.com'], // Explicitly allow your frontend & deployed app
     credentials: true,               
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-// app.use(cors())
+use(cors())
 
 app.use("/api/users",userRouter)
 
