@@ -50,6 +50,7 @@ export function setupAuth({
                 body: JSON.stringify({ email, password }),
                 credentials: "include", // Ensures cookies are stored
             });
+            console.log("heloo")
   
             const data = await response.json();
   
