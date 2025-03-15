@@ -1,11 +1,25 @@
 import express from "express";
 import { registerUser, userLogin, updatePassword, forgotPassword } from "../controllers/user.controllers.js";
 import { verifyToken } from "../middlewares/verifyjwtToken.middlewares.js";
-
+import { upload } from "../middlewares/multer.middlewares.js";
 const router = express.Router();
 
 // Register a new user
-router.post("/register", registerUser);
+router.route("/register").post(
+    upload.fields([
+        {
+            name:"avatar",
+            maxCount:1
+        },
+        {
+            name:"coverImage",
+            maxCount:1
+        }
+    ])
+    
+    
+    
+    ,registerUser)
 
 // Login user
 router.post("/login", userLogin);

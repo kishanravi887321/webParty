@@ -1,0 +1,224 @@
+/* Room Selection and Interface Styles */
+#room-selection {
+    padding: 40px 0;
+    text-align: center;
+  }
+  
+  #room-selection h2 {
+    margin-bottom: 30px;
+    color: var(--primary-color);
+  }
+  
+  .room-cards {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+  }
+  
+  .room-card {
+    border-radius: var(--border-radius);
+    padding: 30px;
+    width: 300px;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .room-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  #private-room {
+    background: linear-gradient(135deg, #2c3e50, #4a69bd);
+    color: white;
+  }
+  
+  #public-room {
+    background: linear-gradient(135deg, #00b894, #6c5ce7);
+    color: white;
+  }
+  
+  .card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+  
+  .room-card h3 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+  }
+  
+  .card-description {
+    opacity: 0;
+    height: 0;
+    transition: var(--transition);
+  }
+  
+  .room-card:hover .card-description {
+    opacity: 1;
+    height: auto;
+    margin-top: 15px;
+  }
+  
+  /* Room Interface */
+  .room-container {
+    background-color: #222;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+  }
+  
+  .room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .room-content {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: 70vh;
+  }
+  
+  .video-container {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    background-color: #000;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    position: relative;
+  }
+  
+  #video-placeholder {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  #video-input-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 80%;
+    max-width: 400px;
+  }
+  
+  .participants-container {
+    grid-column: 2;
+    grid-row: 1;
+    background-color: #333;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    overflow-y: auto;
+  }
+  
+  .participants-container h3 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    text-align: center;
+  }
+  
+  #participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .participant {
+    text-align: center;
+  }
+  
+  .participant-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    margin-bottom: 5px;
+  }
+  
+  .participant-name {
+    font-size: 0.8rem;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .user-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 15px;
+    background-color: #333;
+  }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background-color: #444;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .control-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .control-btn.off {
+    background-color: var(--danger-color);
+    color: white;
+  }
+  
+  /* Responsive Design for Rooms */
+  @media (max-width: 992px) {
+    .room-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .room-content {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr;
+      height: auto;
+    }
+  
+    .video-container {
+      grid-column: 1;
+      grid-row: 1;
+      height: 300px;
+    }
+  
+    .participants-container {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  
+    .chat-container {
+      grid-column: 1;
+      grid-row: 3;
+      height: 300px;
+    }
+  }
+  
+  

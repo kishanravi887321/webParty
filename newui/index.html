@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebParty</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/modal.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/rooms.css">
+    <link rel="stylesheet" href="styles/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Terms and Conditions Modal (First Visit) -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-content">
+            <h2>Terms and Conditions</h2>
+            <div class="terms-text">
+                <p>Welcome to WebParty! Before you proceed, please read and agree to our Terms and Conditions.</p>
+                <p>1. By using WebParty, you agree to abide by our community guidelines.</p>
+                <p>2. You are responsible for all content shared during your sessions.</p>
+                <p>3. We do not store or monitor the content of your video sessions.</p>
+                <p>4. Your personal data is handled according to our Privacy Policy.</p>
+                <p>5. Misuse of the platform may result in account termination.</p>
+            </div>
+            <div class="modal-actions">
+                <button id="agree-terms" class="btn btn-primary">I Agree</button>
+                <button id="decline-terms" class="btn btn-secondary">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h1>WebParty</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#rooms" id="rooms-link">Rooms</a></li>
+        </ul>
+        <div class="auth-section">
+            <button id="login-btn" class="btn btn-primary">Login</button>
+            <button id="signup-btn" class="btn btn-secondary">Sign Up</button>
+            <div id="user-avatar" class="avatar-container hidden">
+                <img src="/placeholder.svg?height=40&width=40" alt="User Avatar" id="avatar-img">
+                <div class="dropdown-menu">
+                    <a href="#profile">Profile</a>
+                    <a href="#settings">Settings</a>
+                    <a href="#" id="logout-btn">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main>
+        <section id="welcome-section" class="hero-section">
+            <h1>Welcome to WebParty</h1>
+            <p>Watch movies and videos together with friends, no matter where you are!</p>
+            <button id="get-started" class="btn btn-primary">Get Started</button>
+        </section>
+
+        <!-- Room Selection UI (Hidden by default) -->
+        <section id="room-selection" class="hidden">
+            <h2>Select Room Type</h2>
+            <div class="room-cards">
+                <div class="room-card" id="private-room">
+                    <div class="card-icon"><i class="fas fa-lock"></i></div>
+                    <h3>Private Room</h3>
+                    <p class="card-description">Create an exclusive space for you and your invited friends.</p>
+                </div>
+                <div class="room-card" id="public-room">
+                    <div class="card-icon"><i class="fas fa-globe"></i></div>
+                    <h3>Public Room</h3>
+                    <p class="card-description">Join an open room and meet new people with similar interests.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Room Creation/Join Modal -->
+        <div id="room-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2 id="room-modal-title">Create a Room</h2>
+                <div id="create-room-form">
+                    <input type="text" id="room-name" placeholder="Enter room name...">
+                    <button id="create-room-btn" class="btn btn-primary">Create Room</button>
+                </div>
+                <div id="join-room-form" class="hidden">
+                    <input type="text" id="room-code" placeholder="Enter invite code...">
+                    <button id="join-room-btn" class="btn btn-primary">Join Room</button>
+                </div>
+                <div class="toggle-form">
+                    <span id="toggle-join">Want to join a room instead?</span>
+                    <span id="toggle-create" class="hidden">Want to create a room instead?</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Interface (Hidden by default) -->
+        <section id="room-interface" class="hidden">
+            <div class="room-container">
+                <div class="room-header">
+                    <h2 id="current-room-name">Room Name</h2>
+                    <div class="room-controls">
+                        <button id="leave-room" class="btn btn-danger">Leave Room</button>
+                    </div>
+                </div>
+                <div class="room-content">
+                    <div class="video-container">
+                        <div id="video-placeholder">
+                            <p>No video playing</p>
+                            <div id="video-input-container" class="hidden">
+                                <input type="text" id="video-url" placeholder="Paste video URL here...">
+                                <button id="load-video" class="btn btn-primary">Load Video</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="participants-container">
+                        <h3>Participants</h3>
+                        <div id="participants-list">
+                            <!-- Participants will be added dynamically -->
+                        </div>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <!-- Messages will be added dynamically -->
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="message-input" placeholder="Type a message...">
+                            <button id="send-message" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-controls">
+                    <button id="toggle-camera" class="control-btn"><i class="fas fa-video"></i></button>
+                    <button id="toggle-mic" class="control-btn"><i class="fas fa-microphone"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Login</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <p class="form-switch">Don't have an account? <a href="#" id="switch-to-signup">Sign up</a></p>
+            </div>
+        </div>
+
+        <!-- Signup Modal -->
+        <div id="signup-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Sign Up</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-username">Username</label>
+                        <input type="text" id="signup-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-fullname">Fullname</label>
+                        <input type="text" id="signup-fullname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="avatar-upload">Profile Picture</label>
+                        <img id="avatar-preview" class="avatar-preview" src="/placeholder.svg?height=100&width=100" alt="Avatar Preview">
+                        <input type="file" id="avatar-upload" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+                <p class="form-switch">Already have an account? <a href="#" id="switch-to-login">Login</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 WebParty. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/rooms.js"></script>
+    <script src="scripts/chat.js"></script>
+</body>
+</html>
+

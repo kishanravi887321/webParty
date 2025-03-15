@@ -1,0 +1,146 @@
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #222;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .logo h1 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    list-style: none;
+  }
+  
+  .nav-links li {
+    margin: 0 15px;
+  }
+  
+  .nav-links a {
+    text-decoration: none;
+    color: var(--light-color);
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+  }
+  
+  .nav-links a:hover {
+    color: var(--primary-color);
+  }
+  
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: var(--transition);
+  }
+  
+  .nav-links a:hover::after {
+    width: 100%;
+  }
+  
+  .auth-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .auth-section button {
+    margin-left: 10px;
+  }
+  
+  .avatar-container {
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .avatar-container img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    transition: var(--transition);
+  }
+  
+  .avatar-container:hover img {
+    transform: scale(1.05);
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: #333;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 150px;
+    display: none;
+    z-index: 10;
+  }
+  
+  .avatar-container:hover .dropdown-menu {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .dropdown-menu a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--light-color);
+    transition: var(--transition);
+  }
+  
+  .dropdown-menu a:hover {
+    background-color: #444;
+    color: var(--primary-color);
+  }
+  
+  /* Mobile Navigation */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column;
+      padding: 15px;
+    }
+  
+    .nav-links {
+      margin: 15px 0;
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .nav-links li {
+      margin: 0 10px;
+    }
+  
+    .auth-section {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  

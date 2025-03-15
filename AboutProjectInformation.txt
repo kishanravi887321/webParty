@@ -1,0 +1,22 @@
+WebParty - Watch Together Project Description
+Overview
+WebParty is a real-time web application designed for users to watch videos together, communicate via chat, and engage in voice/video interactions within synchronized virtual rooms. The platform allows users to create private or public rooms,
+ share video URLs (e.g., YouTube, direct MP4/WebM links), and broadcast playback to all participants in real-time. It leverages WebSockets for real-time communication, WebRTC for voice and video, and modern web technologies for a seamless user experience.
+
+Features
+Real-Time Video Synchronization: Users can share and synchronize video playback (e.g., YouTube, direct video files) across all participants in a room, controlled by the room creator (leader).
+Real-Time Messaging: Participants can send and receive chat messages instantly within the room using WebSocket-based communication.
+Voice and Video Communication: Real-time peer-to-peer audio and video streaming using WebRTC, allowing users to see and hear each other during sessions.
+Room Management:
+Create private or public rooms with unique IDs.
+Join existing rooms by entering a room ID.
+View a list of current participants in the room.
+Leader-Based Control: Only the room creator (leader) can initiate and control video playback, ensuring synchronized viewing for all users.
+Draggable Participants: Video participant tiles are draggable for better user positioning and layout customization.
+Responsive Design: The interface is designed to work on desktops, with a clean, dark-themed UI using CSS and Material Icons for visual appeal.
+Technical Details
+Frontend: Built with HTML, CSS, and JavaScript (ES6 modules).
+Uses the YouTube Iframe API for YouTube video playback.
+Supports direct video playback (MP4, WebM, OGG) and iframe embeds (e.g., pCloud links).
+Leverages WebSocket for real-time data exchange and WebRTC for media streams.
+Backend: A WebSocket server (not included in this repository but required) handles real-time communication (e.g., video synchronization, chat, peer connections). The server can run locally (ws://127.0.0.1:5000) or on a production environment (e.g., wss://webparty-1.onrender.com).

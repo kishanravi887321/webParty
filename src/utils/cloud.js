@@ -83,8 +83,8 @@ const deleteFileOnCloudinary= async (url)=>{
 // uploadImage("./public/default.png")
 // Test the upload function
 export {uploadImage,
-    deleteFile,
-    findPublicId,
-    deleteFileOnCloudinary
+    // deleteFile,
+    // findPublicId,
+    // deleteFileOnCloudinary
 
-}
+};
