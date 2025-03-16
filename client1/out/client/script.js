@@ -8,6 +8,9 @@ import { generateRoomId } from './modules/utils.js';
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+
+
+    
     // Global variables
     let localStream;
     let username = "You";
@@ -17,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let peerList = new Set();
     let myPeerId = null;
     let socket = null;
-
     // Initialize DOM and UI
     const domElements = setupDOM();
     setupUI(domElements, {

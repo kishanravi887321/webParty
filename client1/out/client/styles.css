@@ -16,7 +16,7 @@
 }
 
 body {
-    background-color: var(--dark-bg); /* Default, will be overridden by JS */
+    background-color: var(--dark-bg);
     color: #ffffff;
     min-height: 100vh;
     overflow: hidden;
@@ -32,7 +32,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(10, 10, 10, 0.8); /* Default, will be overridden by JS */
+    background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(10px);
     z-index: 100;
 }
@@ -100,7 +100,7 @@ body {
 }
 
 .modal-content {
-    background: var(--darker-bg); /* Default, will be overridden by JS */
+    background: var(--darker-bg);
     padding: 2rem;
     border-radius: 16px;
     width: 90%;
@@ -252,27 +252,27 @@ body {
     gap: 1rem;
 }
 
-/* Main Container */
 .container {
-    display: flex;
+    display: flex; /* Use flex for layout */
     height: 100vh;
     padding-top: 70px;
+    overflow: hidden; /* Prevent overflow of the container */
 }
 
 /* Sidebar */
 .sidebar {
-    width: 300px;
-    background: var(--darker-bg); /* Default, will be overridden by JS */
+    width: 300px; /* Fixed width, scrollable if content overflows */
+    background: var(--darker-bg);
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    position: relative; /* Added for positioning the color picker */
+    overflow-y: auto; /* Enable vertical scrolling for the entire sidebar */
 }
 
 .room-info {
     padding: 1rem;
     border-bottom: 1px solid var(--glass-border);
-    position: relative; /* For absolute positioning of the button */
+    position: relative;
 }
 
 .chat-container {
@@ -284,7 +284,7 @@ body {
 .chat-messages {
     flex: 1;
     padding: 1rem;
-    overflow-y: auto;
+    overflow-y: auto; /* Ensure chat messages are scrollable */
 }
 
 .message {
@@ -335,18 +335,24 @@ body {
     outline: none;
 }
 
+/* Remove Resizable Handle (no longer needed) */
+.resize-handle {
+    display: none; /* Hide the resize handle since it’s not in HTML */
+}
+
 /* Main Content */
 .main-content {
-    flex: 1;
+    flex: 1; /* Takes remaining space */
     padding: 1rem;
-    background: var(--dark-bg); /* Default, will be overridden by JS */
+    background: var(--dark-bg);
     position: relative;
+    overflow: auto; /* Allow scrolling if content overflows */
 }
 
 .video-container {
     width: 100%;
     height: 100%;
-    background: #000; /* Default, will be overridden by JS */
+    background: #000;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
@@ -438,4 +444,10 @@ body {
 .color-picker-btn .material-icons {
     font-size: 20px;
     color: white;
+}
+.container {
+    display: flex;
+    height: 100vh;
+    padding-top: 70px;
+    overflow: hidden;
 }

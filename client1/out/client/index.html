@@ -9,7 +9,6 @@
     <!-- Inject WebSocket URL dynamically for local dev or Render production -->
     <script>
         // Detect if running locally or on a server (e.g., Render)
-       
         window.WEBSOCKET_URL = "wss://webparty-1.onrender.com";
         console.log("WebSocket URL set to:", window.WEBSOCKET_URL);
     </script>
@@ -25,12 +24,9 @@
                 <span class="material-icons">meeting_room</span>
                 Select Room
             </button>
-           
         </div>
     </nav>
-    <button class="btn" id="loginBtn">
-      
-    </button>
+    <button class="btn" id="loginBtn"></button>
     <!-- Login/Register Modal -->
     <div class="modal" id="authModal">
         <div class="modal-content">
@@ -120,13 +116,14 @@
                 <div id="roomIdDisplay" style="margin-top: 1rem; text-align: center; font-size: 1.2rem; color: var(--neon-primary);">
                     Room ID: <span id="generatedRoomId">Not Generated</span>
                 </div>
-                <!-- Color Picker Button -->
                 <button class="color-picker-btn" id="colorPickerBtn" title="Change Room Colors">
                     <span class="material-icons">palette</span>
                 </button>
             </div>
             <div class="chat-container">
-                <div class="chat-messages"></div>
+                <div class="chat-messages">
+                    <!-- Chat messages will be populated here -->
+                </div>
                 <div class="chat-input">
                     <input type="text" placeholder="Type your message...">
                     <button class="control-btn">
@@ -135,7 +132,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Main Content -->
         <div class="main-content">
             <div class="video-container">
