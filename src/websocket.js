@@ -58,7 +58,7 @@ export const setupWebSocket = (server) => {
                     }));
                     ws.send(JSON.stringify({ 
                         type: "chat", 
-                        message: `You have joined the room ${roomId}.`, 
+                        message: `Boom! 💥 Room ${roomId} is now live`,
                         username: "System", 
                         roomId, 
                         peerId: "system" 
@@ -116,7 +116,7 @@ export const setupWebSocket = (server) => {
                     }));
                     ws.send(JSON.stringify({ 
                         type: "chat", 
-                        message: `You have joined the room ${roomId}.`, 
+                        message: `You’ve successfully joined room ${roomId}`, 
                         username: "System", 
                         roomId, 
                         peerId: "system" 

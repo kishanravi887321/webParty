@@ -95,6 +95,8 @@ const userLogin = asyncHandler(async (req, res) => {
     // Generate token if password is correct
     const accessToken = user.generateAccessToken(user._id);
 
+    console.log(accessToken)
+
     return res
         .status(200)
         .cookie('accessToken', accessToken, { 
