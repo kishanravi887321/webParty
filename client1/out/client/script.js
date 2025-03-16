@@ -20,6 +20,39 @@ document.addEventListener('DOMContentLoaded', () => {
     let peerList = new Set();
     let myPeerId = null;
     let socket = null;
+// Add toggle button for sidebar on mobile
+// Add toggle button for sidebar on mobile
+// Add toggle button for sidebar on mobile
+const sidebar = document.querySelector(".sidebar");
+const toggleBtn = document.createElement("button");
+toggleBtn.className = "btn sidebar-toggle";
+toggleBtn.innerHTML = '<span class="material-icons">chat</span> Chat';
+toggleBtn.style.display = "none"; // Hidden by default on desktop
+
+// Add toggle button to the nav
+document.querySelector(".nav").appendChild(toggleBtn);
+
+// Show toggle button on mobile
+const checkMobile = () => {
+    if (window.innerWidth <= 768) {
+        toggleBtn.style.display = "block";
+        sidebar.classList.remove("active"); // Hide sidebar by default on mobile
+    } else {
+        toggleBtn.style.display = "none";
+        sidebar.classList.add("active"); // Show sidebar on desktop
+    }
+};
+
+// Initial check
+checkMobile();
+
+// Update on window resize
+window.addEventListener("resize", checkMobile);
+
+// Toggle sidebar on button click
+toggleBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+});
     // Initialize DOM and UI
     const domElements = setupDOM();
     setupUI(domElements, {

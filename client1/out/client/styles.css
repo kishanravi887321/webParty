@@ -252,21 +252,23 @@ body {
     gap: 1rem;
 }
 
+/* Main Container */
+/* Main Container */
 .container {
-    display: flex; /* Use flex for layout */
+    display: flex;
     height: 100vh;
     padding-top: 70px;
-    overflow: hidden; /* Prevent overflow of the container */
+    overflow: hidden;
 }
 
 /* Sidebar */
 .sidebar {
-    width: 300px; /* Fixed width, scrollable if content overflows */
+    width: 300px; /* Fixed width for desktop */
     background: var(--darker-bg);
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Enable vertical scrolling for the entire sidebar */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .room-info {
@@ -279,10 +281,12 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* Push chat-input to bottom */
+    height: 100%; /* Ensure full height */
 }
 
 .chat-messages {
-    flex: 1;
+    flex-grow: 1; /* Allow messages to take available space */
     padding: 1rem;
     overflow-y: auto; /* Ensure chat messages are scrollable */
 }
@@ -321,6 +325,7 @@ body {
     background: rgba(255, 255, 255, 0.05);
     margin: 1rem;
     border-radius: 8px;
+    min-height: 50px; /* Ensure visibility */
 }
 
 .chat-input input {
@@ -335,20 +340,16 @@ body {
     outline: none;
 }
 
-/* Remove Resizable Handle (no longer needed) */
-.resize-handle {
-    display: none; /* Hide the resize handle since it’s not in HTML */
-}
-
 /* Main Content */
 .main-content {
-    flex: 1; /* Takes remaining space */
+    flex: 1;
     padding: 1rem;
     background: var(--dark-bg);
     position: relative;
-    overflow: auto; /* Allow scrolling if content overflows */
+    overflow: auto;
 }
 
+/* Video Container and Participants */
 .video-container {
     width: 100%;
     height: 100%;
@@ -358,7 +359,6 @@ body {
     position: relative;
 }
 
-/* Participant Videos */
 .participants {
     position: absolute;
     bottom: 2rem;
@@ -445,9 +445,264 @@ body {
     font-size: 20px;
     color: white;
 }
-.container {
-    display: flex;
-    height: 100vh;
-    padding-top: 70px;
-    overflow: hidden;
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+    /* Main Container: Stack sidebar and main content vertically */
+    .container {
+        flex-direction: column;
+        padding-top: 60px; /* Reduce padding for smaller screens */
+        height: auto; /* Allow height to adjust */
+    }
+
+    /* Sidebar: Full width, hidden by default, toggleable */
+    .sidebar {
+        width: 100%; /* Full width on mobile */
+        height: calc(100vh - 60px); /* Full height minus nav height */
+        display: none; /* Hidden by default */
+        border-right: none; /* Remove border when stacked */
+        border-bottom: 1px solid var(--glass-border);
+        position: fixed; /* Ensure it stays in place */
+        top: 60px; /* Align below nav */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 90; /* Below nav but above main-content */
+    }
+
+    .sidebar.active {
+        display: flex; /* Show when toggled */
+    }
+
+    /* Hide main-content when sidebar is active */
+    .sidebar.active ~ .main-content {
+        display: none; /* Hide main-content when sidebar is active */
+    }
+
+    .chat-container {
+        height: 100%; /* Ensure full height for scrolling */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-messages {
+        flex-grow: 1; /* Allow messages to take available space */
+        padding: 0.5rem;
+    }
+
+    .message {
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+
+    .message .time {
+        font-size: 0.7rem;
+    }
+
+    .chat-input {
+        padding: 0.5rem;
+        margin: 0.5rem;
+        gap: 0.3rem;
+        min-height: 40px; /* Ensure visibility on mobile */
+    }
+
+    .chat-input input {
+        font-size: 0.8rem;
+    }
+
+    .control-btn .material-icons {
+        font-size: 16px;
+    }
+
+    /* Main Content: Take remaining space */
+    .main-content {
+        flex: 1;
+        padding: 0.5rem;
+        height: calc(100vh - 60px); /* Full height minus nav height */
+    }
+
+    .video-container {
+        height: 100%;
+    }
+
+    /* Participants: Adjust size and position for mobile */
+    .participants {
+        bottom: 1rem;
+        right: 1rem;
+        gap: 0.5rem;
+    }
+
+    .participant {
+        width: 80px;
+        height: 80px;
+        border-width: 1px;
+    }
+
+    .participant .controls {
+        padding: 0.3rem;
+    }
+
+    .control-btn .material-icons {
+        font-size: 14px;
+    }
+
+    /* Navigation: Adjust for mobile */
+    .nav {
+        padding: 0.5rem 1rem;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .nav-buttons {
+        gap: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btn .material-icons {
+        font-size: 16px;
+    }
+
+    /* Modal: Adjust for mobile */
+    .modal-content {
+        padding: 1rem;
+        max-width: 90%;
+    }
+
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .close-btn {
+        font-size: 1.2rem;
+    }
+
+    .auth-tabs {
+        gap: 0.5rem;
+    }
+
+    .auth-tab {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group .material-icons {
+        font-size: 18px;
+    }
+
+    /* Room Selection: Adjust for mobile */
+    .room-options {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .room-option {
+        padding: 1rem;
+    }
+
+    .room-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .room-icon .material-icons {
+        font-size: 24px;
+    }
+
+    .room-option h3 {
+        font-size: 1rem;
+    }
+
+    .room-option p {
+        font-size: 0.8rem;
+    }
+
+    .room-actions {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+
+/* For very small screens (e.g., phones < 480px) */
+@media (max-width: 480px) {
+    .participant {
+        width: 60px;
+        height: 60px;
+    }
+
+    .modal-content {
+        padding: 0.8rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1rem;
+    }
+
+    .close-btn {
+        font-size: 1rem;
+    }
+
+    .auth-tab {
+        font-size: 0.8rem;
+    }
+
+    .form-group input {
+        padding: 0.6rem 0.6rem 0.6rem 2rem;
+        font-size: 0.8rem;
+    }
+
+    .form-group .material-icons {
+        font-size: 16px;
+    }
+
+    .room-option {
+        padding: 0.8rem;
+    }
+
+    .room-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .room-icon .material-icons {
+        font-size: 20px;
+    }
+
+    .room-option h3 {
+        font-size: 0.9rem;
+    }
+
+    .room-option p {
+        font-size: 0.7rem;
+    }
+}
+
+/* Sidebar Toggle Button (for mobile) */
+.sidebar-toggle {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 100;
+}
+
+@media (min-width: 769px) {
+    .sidebar-toggle {
+        display: none; /* Hide toggle button on desktop */
+    }
 }
