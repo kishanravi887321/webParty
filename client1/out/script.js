@@ -1,9 +1,17 @@
 // script.js
-import { setupAuth } from "./modules/auth.js";
+import { setupAuth } from "./modulesMain/auth.js";
 
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM fully loaded");
+
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const navLinks = document.querySelector(".nav-links");
+    if (hamburgerBtn && navLinks) {
+        hamburgerBtn.addEventListener("click", () => {
+            navLinks.classList.toggle("active");
+        });
+    }
 
   // Check if user is already logged in
   const storedToken = localStorage.getItem("accessToken");
@@ -23,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (userProfile) userProfile.style.display = "block";
     if (userAvatar) userAvatar.src = storedUser.avatar || "/placeholder.svg?height=40&width=40";
     if (dropdownUserAvatar) dropdownUserAvatar.src = storedUser.avatar || "/placeholder.svg?height=60&width=60";
-    if (dropdownUsername) dropdownUsername.textContent = storedUser.username || "User";
+    if (dropdownUsername) dropdownUsername.textContent = storedUser.userName || "User";
     if (dropdownEmail) dropdownEmail.textContent = storedUser.email || "No email provided";
   }
 
@@ -88,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("getStartedBtn").addEventListener("click", () => {
     const token = localStorage.getItem("accessToken"); // Updated to use accessToken
     if (token) {
-      window.location.href = "./client/out/index.html"; // Redirect to out/index.html
+      window.location.href = "./client/index.html"; // Redirect to out/index.html
     } else {
       document.getElementById("authModal").classList.add("active");
     }
@@ -96,10 +104,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Rooms link
   document.getElementById("roomsLink").addEventListener("click", (e) => {
+    console.log("clicked ")
     e.preventDefault();
     const token = localStorage.getItem("accessToken"); // Updated to use accessToken
     if (token) {
-      window.location.href = "./client/out/index.html"; // Redirect to out/index.html
+      window.location.href = "./client/index.html"; // Redirect to out/index.html
     } else {
       alert("Please login to access rooms");
       document.getElementById("authModal").classList.add("active");
@@ -111,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken"); // Updated to use accessToken
     if (token) {
-      window.location.href = "./client/out/index.html"; // Redirect to out/index.html
+      window.location.href = "./client/index.html"; // Redirect to out/index.html
     } else {
       alert("Please login to access rooms");
       document.getElementById("authModal").classList.add("active");

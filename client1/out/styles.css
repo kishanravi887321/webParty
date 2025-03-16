@@ -1172,6 +1172,46 @@ body {
   color: white;
 }
 
+/* Hamburger Menu Styles */
+.hamburger {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  color: var(--light);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-link {
+  color: var(--light);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .hero {
@@ -1201,23 +1241,33 @@ body {
     height: 300px;
   }
 
+  .hamburger {
+    display: block; /* Show hamburger button on mobile */
+  }
+
   .nav-links {
-    display: none;
+    display: none; /* Hidden by default on mobile */
+    flex-direction: column;
     position: absolute;
     top: 70px;
     left: 0;
     right: 0;
     background: var(--darker);
-    flex-direction: column;
     padding: 1rem;
+    z-index: 1000;
   }
 
   .nav-links.active {
-    display: flex;
+    display: flex; /* Show when toggled */
   }
 
-  .menu-toggle {
-    display: block;
+  .nav-link {
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
+
+  .nav-buttons {
+    display: none; /* Hide buttons on mobile, optional */
   }
 }
 
@@ -1235,4 +1285,3 @@ body {
     grid-template-columns: 1fr;
   }
 }
-

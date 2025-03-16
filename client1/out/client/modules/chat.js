@@ -4,6 +4,10 @@ export function sendMessage(chatInput, socket, currentRoomId, username, displayM
         alert("Please join or create a room and ensure WebSocket is connected before sending messages.");
         return;
     }
+    
+    const storedUser = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+
+    username=storedUser.userName ||"you";
     const message = chatInput.value.trim();
     if (message) {
         const chatData = { 
