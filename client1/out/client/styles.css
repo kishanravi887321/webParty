@@ -695,7 +695,7 @@ body {
 
 /* Sidebar Toggle Button (for mobile) */
 .sidebar-toggle {
-    position: fixed;
+    position:initial;
     bottom: 1rem;
     left: 1rem;
     z-index: 100;
