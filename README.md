@@ -21,7 +21,7 @@
 | **Frontend**    | HTML5, CSS3, JavaScript                     |
 | **RTC Layer**   | WebRTC (getUserMedia, RTCPeerConnection)    |
 | **Signaling**   | WebSockets / Custom Signaling Server (optional) |
-| **Cloud Storage** | Google Drive, Dropbox, OneDrive, etc.     |
+| **Cloud Storage** |cloudinary     |
 
 ---
 
